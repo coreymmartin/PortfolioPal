@@ -1,0 +1,47 @@
+@model IEnumerable<Order>
+
+<div id="order-history">
+    <h3>All Filled Asset Orders</h3>
+    <table class="table">
+        <tr>
+                <th>id</th>
+                <th>clientOrderId</th>
+                <th>status</th>
+                <th>filledAt</th>
+                <th>symbol</th>
+                <th>assetID</th>
+                <th>assetClass</th>
+                <th>filledQty</th>
+                <th>qty</th>
+                <th>orderType</th>
+                <th>filledPrice</th>
+                <th>timeInForce</th>
+                <th>extendedHours</th>                
+        </tr>
+        @foreach (var o in Model){
+            <tr>
+                <td>@o.id</td>
+                <td>@o.clientOrderId</td>
+                <td>@o.status</td>
+                <td>@o.filledAt</td>
+                <td>@o.symbol</td>
+                <td>@o.assetID</td>
+                <td>@o.assetClass</td>
+                <td>@o.filledQty</td>
+                <td>@o.qty</td>
+                <td>@o.orderType</td>
+                <td>@o.filledPrice</td>
+                <td>@o.timeInForce</td>
+                <td>@o.extendedHours</td>                
+            </tr>
+        }
+
+    </table>
+</div>
+<div id="graphics-plus-orders">
+    <h3>Asset Price/Order Timeline</h3>
+    <p>here goes a nice chart of the asset equity
+        <br>and we can overlay the orders at the correct time. cool.
+    </p>
+</div>
+

@@ -1,0 +1,66 @@
+﻿@model OrderRepo
+
+<h2>Portfolio Orders</h2>
+
+<div id="orders-actions">
+
+<ul>
+    <li><a class="testes" asp-area="" asp-controller="Orders" asp-action="Index">Overview</a></li>
+    <li><a class="testes" asp-area="" asp-controller="Orders" asp-action="DisplayAllOrders">Display All Orders</a></li>
+    <li><a class="testes" asp-area="" asp-controller="Orders" asp-action="UpdateOrders">Update Orders</a></li>
+    <li><a class="testes" asp-area="" asp-controller="Orders" asp-action="GetAllOrders">Initialize Orders</a></li>
+</ul>
+</div>
+
+
+<div id="orders-overview">
+    <h3>Orders Overview</h3>
+    <section>
+        <table>
+            <tr>
+                <th>Total Orders</th>
+                <th>Total Traded ($)</th>
+                <th>Buys/Sells</th>
+                <th>Number Traded Assets</th>
+            </tr>
+            <tr>
+                <td>@Model.TotalNumberTrades</td>
+                <td>@Model.TotalTraded</td>
+                <td>@Model.TotalNumberBuys/@Model.TotalNumberSells</td>
+                <td>@Model.NumAssetsTraded</td>
+            </tr>
+        </table>
+    </section>
+</div>
+
+<div id="recent-orders">
+    <table>
+        <tr>
+            <th>symbol</th>
+            <th>side</th>
+            <th>status</th>
+            <th>filledQty</th>
+            <th>filledPrice</th>
+            <th>filledAt</th>
+            <th>orderType</th>
+            <th>assetClass</th>
+            <th>clientOrderId</th>
+        </tr>
+        @foreach(var r in Model.RecentFilledOrders){
+            <tr>
+                <td>@r.symbol</td>
+                <td>@r.side</td>
+                <td>@r.status</td>
+                <td>@r.filledQty</td>
+                <td>@r.filledPrice</td>
+                <td>@r.filledAt</td>
+                <td>@r.orderType</td>
+                <td>@r.assetClass</td>
+                <td>@r.clientOrderId</td>
+            </tr>
+        }
+    </table>
+</div>
+
+
+

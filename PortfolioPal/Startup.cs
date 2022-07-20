@@ -4,10 +4,11 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Data;
+using MySql.Data.MySqlClient;
 
 namespace PortfolioPal
 {
@@ -23,6 +24,14 @@ namespace PortfolioPal
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<IDbConnection>((s) =>
+            {
+                IDbConnection conn = new MySqlConnection(Configuration.GetConnectionString("portfoliopal"));
+                conn.Open();
+                return conn;
+            });
+            services.AddTransient<IPotentialRepo, PotentialRepo>();
+            //services.AddTransient<IOrderRepo, OrderRepo>();
             services.AddControllersWithViews();
         }
 

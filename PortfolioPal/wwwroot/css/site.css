@@ -69,3 +69,34 @@ body {
   white-space: nowrap;
   line-height: 60px; /* Vertically center the text there */
 }
+/* columns?
+-------------------------------------------------- */
+.row-mine{
+  display: flex;
+}
+.column-mine {
+    float: none;
+}
+.left {
+    width: 0%;
+}
+.right {
+    width: 75%;
+}
+
+/* table scroll?
+-------------------------------------------------- */
+.table{
+  max-height: 10%;
+  overflow-y: scroll;
+  scroll-behavior: smooth;
+  font-size: small;
+}
+
+th{
+  font-weight: 500;
+}
+
+
+
+

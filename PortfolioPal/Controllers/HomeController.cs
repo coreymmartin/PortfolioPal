@@ -12,6 +12,7 @@ namespace PortfolioPal.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly IPortfolioRepo repo = new PortfolioRepo();
 
         public HomeController(ILogger<HomeController> logger)
         {
@@ -20,7 +21,13 @@ namespace PortfolioPal.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            var p = new Portfolio();
+            p = repo.GetAccount(p);
+            repo.CheckMarketOpen(p);
+            repo.GetAllPortfolioPositions(p);
+            repo.UpdatePortfolioDiversity(p);
+            repo.GetPortfolioHistory();
+            return View(p);
         }
 
         public IActionResult Privacy()

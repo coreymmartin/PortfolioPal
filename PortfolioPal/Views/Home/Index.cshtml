@@ -1,8 +1,128 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-}
+﻿@model Portfolio
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+<link rel="stylesheet" href="~/css/site.css" />
+
+<div class="container">
+
+
+    <div class="row-mine">
+        <div class="column-mine">
+            <p>Market Open: @Model.marketOpen</p>
+            <p>Today's PL: ($@Math.Round(@Model.todaysPLD, 2)/@Math.Round(@Model.todaysPLP, 2)%)</p>
+            <h4>Portfolio Summary</h4>
+            <div class="table table-striped responsive px-3">
+                <table class="table-tiny">
+                    <tr>
+                        <th>Account Number</th>
+                        <td>@Model.accountNumber</td>
+                    </tr>
+                    <tr>
+                        <th>status</th>
+                        <td>@Model.status</td>
+                    </tr>
+                    <tr>
+                        <th>cryptoStatus</th>
+                        <td>@Model.cryptoStatus</td>
+                    </tr>
+                    <tr>
+                        <th>currency</th>
+                        <td>@Model.currency</td>
+                    </tr>
+                    <tr>
+                        <th>equity</th>
+                        <td>$@Math.Round(@Model.equity, 2)</td>
+                    </tr>
+                    <tr>
+                        <th>lastEquity</th>
+                        <td>$@Math.Round(@Model.lastEquity, 2)</td>
+                    </tr>
+                    <tr>
+                        <th>cash</th>
+                        <td>$@Math.Round(@Model.cash, 2)</td>
+                    </tr>
+                    <tr>
+                        <th>buyingPower</th>
+                        <td>$@Math.Round(@Model.buyingPower, 2)</td>
+                    </tr>
+                    <tr>
+                        <th>accrued_fees</th>
+                        <td>$@Math.Round(@Model.accrued_fees, 2)</td>
+                    </tr>
+                    <tr>
+                        <th>patternDayTrader</th>
+                        <td>@Model.patternDayTrader</td>
+                    </tr>
+                    <tr>
+                        <th>longMarketValue</th>
+                        <td>$@Math.Round(@Model.longMarketValue, 2)</td>
+                    </tr>
+                    <tr>
+                        <th>shortMarketValue</th>
+                        <td>-$@Math.Abs(@Math.Round(@Model.shortMarketValue, 2))</td>
+                    </tr>
+                    <tr>
+                        <th>createdAt</th>
+                        <td>@Model.createdAt</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="table table-striped">
+                <div class="column-mine">
+                    <h5>Asset Diversity</h5>
+                    <table class="table-tiny">
+                        <tr>
+                            <th>Stock Holding<br>($@Math.Round(@Model.stockHoldingLimit, 2))</th>
+                            <td>$@Math.Round(@Model.stockHoldingActual, 2) (@Math.Round((@Model.stockHoldingActual / @Model.stockHoldingLimit) * 100, 2)%)</td>
+                        </tr>
+                        <tr>
+                            <th>Crypto Holding<br>($@Math.Round(@Model.cryptoHoldingLimit, 2))</th>
+                            <td>$@Math.Round(@Model.cryptoHoldingActual, 2) (@Math.Round((@Model.cryptoHoldingActual / @Model.cryptoHoldingLimit) * 100, 2)%)</td>
+                        </tr>
+                        <tr>
+                            <th>Dividend Holding<br>($@Math.Round(@Model.dividendHoldingLimit, 2))</th>
+                            <td>$@Math.Round(@Model.dividendHoldingActual, 2) (@Math.Round((@Model.dividendHoldingActual / @Model.dividendHoldingLimit) * 100, 2)%)</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <div class = "column-mine">
+            <h4>Portfolio Positions</h4>
+            <table class="table table-striped responsive">
+                <tr>
+                    <th>symbol</th>
+                    <th>asset class</th>
+                    <th>price</th>
+                    <th>qty</th>
+                    <th>side</th>
+                    <th>market value</th>
+                    <th>cost basis</th>
+                    <th>pl(%)</th>
+                    <th>pl($)</th>
+                    <th>last price</th>
+                    <th>change today</th>
+                </tr>
+                @foreach (var pos in Model.portfolioPositions){
+                    <tr>
+                        <td>@pos.symbol</td>
+                        <td>@pos.assetClass</td>
+                        <td>$@pos.price</td>
+                        <td>@Math.Round(@pos.qty, 2)</td>
+                        <td>@pos.side</td>
+                        <td>$@Math.Round(@pos.marketValue, 2)</td>
+                        <td>$@Math.Round(@pos.costBasis, 2)</td>
+                        <td>@Math.Round(@pos.plPercentTotal, 4)</td>
+                        <td>$@Math.Round(@pos.plDollarsTotal, 2)</td>
+                        <td>$@Math.Round(@pos.lastPrice, 2)</td>
+                        <td>$@Math.Round(@pos.changeToday, 2)</td>
+                    </tr>
+                }
+            </table>
+        </div>
+    </div>
+
 </div>
+

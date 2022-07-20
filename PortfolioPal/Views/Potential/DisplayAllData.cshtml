@@ -1,0 +1,78 @@
+﻿@model IEnumerable<Potential>
+
+<h2>Portfolio Screener</h2>
+<h3>All Data</h3>
+<ul>
+    <li><a class="testes" asp-area="" asp-controller="Potential" asp-action="Index">Overview</a></li>
+    <li><a class="testes" asp-area="" asp-controller="Potential" asp-action="GetMoreData">Get More Data</a></li>
+    <li><a class="testes" asp-area="" asp-controller="Potential" asp-action="Screen">Screen New Data</a></li>
+    <li><a class="testes" asp-area="" asp-controller="Potential" asp-action="DisplayAllData">Display All Data</a></li>
+    <li><a class="testes" asp-area="" asp-controller="Potential" asp-action="InitDB">Initialize Data</a></li>
+</ul>
+   
+<div id="testing-screener">
+    <h3>All Potential Data</h3>
+    <table class="table">
+        <tr>
+            <th>Score</th>
+            <th>Symbol</th>
+            <th>Price</th>
+            <th>Company</th>
+            <th>MarketCap</th>
+            <th>1Yr H</th>
+            <th>1Yr L</th>
+            <th>1Yr Chg</th>
+            <th>30D AvgV</th>
+            <th>EPS</th>
+            <th>Div Rate</th>
+            <th>Div Yield</th>
+            <th>next Div</th>
+            <th>Last Div</th>
+            <th>Div freq</th>
+            <th>PE</th>
+            <th>beta</th>
+            <th>5Yr % Chg</th>
+            <th>1Yr % Chg</th>
+            <th>6M % Chg</th>
+            <th>3M % Chg</th>
+            <th>1M % Chg</th>
+            <th>30D % Chg</th>
+            <th>5D % Chg</th>
+            <th>Exchange</th>
+            <th>Class</th>
+            <th>Updated</th>
+        </tr>
+        @foreach (var m in Model)
+        {
+            <tr>
+                <td>@m.score</td>
+                <td>@m.symbol</td>
+                <td>@m.price</td>
+                <td>@m.companyName</td>
+                <td>@m.marketCap</td>
+                <td>@m.week52High</td>
+                <td>@m.week52Low</td>
+                <td>@m.week52Change</td>
+                <td>@m.avg30Volume</td>
+                <td>@m.ttmEPS</td>
+                <td>@m.ttmDividendRate</td>
+                <td>@m.dividendYield</td>
+                <td>@m.nextDividendDate</td>
+                <td>@m.exDividendDate</td>
+                <td>@m.dividendFrequency</td>
+                <td>@m.peRatio</td>
+                <td>@m.beta</td>
+                <td>@m.year5ChangePercent</td>
+                <td>@m.year1ChangePercent</td>
+                <td>@m.month6ChangePercent</td>
+                <td>@m.month3ChangePercent</td>
+                <td>@m.month1ChangePercent</td>
+                <td>@m.day30ChangePercent</td>
+                <td>@m.day5ChangePercent</td>
+                <td>@m.exchange</td>
+                <td>@m.assetClass</td>
+                <td>@m.updated</td>
+            </tr>
+        }
+    </table>
+</div>
