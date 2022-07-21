@@ -9,6 +9,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Data;
 using MySql.Data.MySqlClient;
+using System.Net.Http;
+using Newtonsoft.Json.Linq;
+using System.IO;
 
 namespace PortfolioPal
 {
@@ -30,8 +33,9 @@ namespace PortfolioPal
                 conn.Open();
                 return conn;
             });
+
             services.AddTransient<IPotentialRepo, PotentialRepo>();
-            //services.AddTransient<IOrderRepo, OrderRepo>();
+            services.AddTransient<IOrderRepo, OrderRepo>();
             services.AddControllersWithViews();
         }
 

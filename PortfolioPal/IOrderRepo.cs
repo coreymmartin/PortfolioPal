@@ -16,7 +16,13 @@ namespace PortfolioPal
         public void AddOrdersToDB(List<Order> orders);
        
        public void CalcOrderOverview();
+       public void GetAllTradedAssets();
        
+       public List<string> ReadAllTradedAssetsFromOrders();
+
+        public void UpdateAllOrders();
+
+
         //public void RemoveAllOrdersDB();
 
 

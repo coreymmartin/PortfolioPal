@@ -1,20 +1,24 @@
-﻿@model OrderRepo
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@model AssetRepo
 
-<h2>Portfolio Orders</h2>
+<h2>Trade Assets</h2>
 
-<div id="orders-actions">
+<div id="assets-actions">
 
 <ul>
-    <li><a class="testes" asp-area="" asp-controller="Orders" asp-action="Index">Overview</a></li>
-    <li><a class="testes" asp-area="" asp-controller="Orders" asp-action="DisplayAllOrders">Display All Orders</a></li>
-    <li><a class="testes" asp-area="" asp-controller="Orders" asp-action="UpdateOrders">Update Orders</a></li>
-    <li><a class="testes" asp-area="" asp-controller="Orders" asp-action="GetAllOrders">Initialize Orders</a></li>
+    <li><a class="testes" asp-area="" asp-controller="TradeAssets" asp-action="UpdateAssets">Update Trade Assets</a></li>
+    <li><a class="testes" asp-area="" asp-controller="TradeAssets" asp-action="Index">Reset Trade Assets</a></li>
+    <li><a class="testes" asp-area="" asp-controller="TradeAssets" asp-action="Index">Edit Trade Assets</a></li>
 </ul>
 </div>
 
 
-<div id="orders-overview">
-    <h3>Orders Overview</h3>
+<div id="active-assets-overview">
+    <h3>Active Assets</h3>
     <section>
         <table class="table table-striped responsive">
             <tr>

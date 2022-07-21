@@ -24,6 +24,7 @@ namespace PortfolioPal
         private bool tableConfirmed = false;
         public List<Order> RecentFilledOrders;
         public List<Order> AllFilledOrders;
+        public List<Asset> AllTradedAssets;
 
         public double TotalTraded {get; set;}
         public int NumAssetsTraded {get; set;}
@@ -31,56 +32,83 @@ namespace PortfolioPal
         public double TotalNumberBuys {get; set;}
         public double TotalNumberSells {get; set;}
 
-        public OrderRepo()
+        public OrderRepo(IDbConnection conn)
         {
+            _conn = conn;
             _clientBroker = new HttpClient();
             _clientBroker.DefaultRequestHeaders.Add("APCA-API-KEY-ID", APCA_API_KEY);
             _clientBroker.DefaultRequestHeaders.Add("APCA-API-SECRET-KEY", APCA_API_SECRET);
-         
-            var config = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json").Build();
-            string connString = config.GetConnectionString("portfoliopal");
-            _conn = new MySqlConnection(connString);
-            // do we need to close this connection? maybe so? because then we keep openning new ones?
-
             RecentFilledOrders = new List<Order>();
+
         }
+
+
+        //public OrderRepo()
+        //{
+        //    _clientBroker = new HttpClient();
+        //    _clientBroker.DefaultRequestHeaders.Add("APCA-API-KEY-ID", APCA_API_KEY);
+        //    _clientBroker.DefaultRequestHeaders.Add("APCA-API-SECRET-KEY", APCA_API_SECRET);
+        // 
+        //    //var config = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json").Build();
+        //    //string connString = config.GetConnectionString("portfoliopal");
+        //    //_conn = new MySqlConnection(connString);
+        //    // do we need to close this connection? maybe so? because then we keep openning new ones?
+        //}
 
         public void CreateOrderTableDB()
         {
             _conn.Execute("DROP TABLE IF EXISTS `orders`; " +
                 "CREATE TABLE `orders`( " +
+                "`orderIndex` INT AUTO_INCREMENT PRIMARY KEY, " +
                 "`symbol` VARCHAR(10), " +
                 "`side` VARCHAR(10), " +
                 "`filledQty` FLOAT(10), " +
-                "`filledPrice` Float(10), " +
+                "`filledPrice` FLOAT(10), " +
                 "`assetClass` VARCHAR(25), " +
                 "`orderType` VARCHAR(25), " +
                 "`orderStatus` VARCHAR(25), " +
                 "`extendedHours` TINYINT, " +
-                "`filledAt` VARCHAR(50), " +
+                "`filledAt` VARCHAR(25), " +
                 "`timeInForce` VARCHAR(25), " +
                 "`qty` FLOAT(10), " +
                 "`assetID` VARCHAR(100), " +
                 "`clientOrderID` VARCHAR(100), " +
-                "`orderID` VARCHAR(100) PRIMARY KEY);");
+                "`orderID` VARCHAR(100));");
         }
 
         public void CheckForTable()
         {
             if (!tableConfirmed){
-                if (_conn.ExecuteScalar($"SHOW TABLES LIKE 'orders';") == null)
-                CreateOrderTableDB();
-                tableConfirmed = true;
+                if (_conn.ExecuteScalar($"SHOW TABLES LIKE 'orders';") == null){
+                    CreateOrderTableDB();
+                } tableConfirmed = true;
             }
         }
 
-        public List<Order> GetBatchOrders(string status, int limit, string afterUntilKey, string afterUntilValue, string direction)
+        public List<Order> GetBatchOrders(string status = "none", int limit = 0, string afterUntilKey = "none", string afterUntilValue = "none", string direction = "none")
         {
+            // initialize values
+            string urlQueries = "?";
+            var statusLabel = (status == "open" || status == "closed" || status == "all") ? $"status={status}" : "status=closed";
+            var limitLabel = (limit == 0 || limit < 0 || limit > 500) ? "limit=100" : $"limit={limit}";
+            var afterUntilKeyLabel = (afterUntilKey != "after" && afterUntilKey != "until") ? "" : $"{afterUntilKey}=";
+            string afterUntilValueLabel = "";
+            if (afterUntilKeyLabel != "" && afterUntilValue != "none") {
+                var templabel = (afterUntilValue.Contains(" ")) ? afterUntilValue.Substring(0, afterUntilValue.IndexOf(" ")) : afterUntilValue;
+                afterUntilValueLabel = (DateTime.TryParse(templabel, out DateTime goodDate)) ? (direction == "desc" && goodDate == DateTime.Today) ? $"{goodDate.AddDays(1).ToShortDateString()}" : $"{goodDate.ToShortDateString()}" : "";
+            }
+            var directionLabel = (direction == "asc" || direction == "desc") ? $"direction={direction}" : "";
+            urlQueries += (statusLabel != "") ? $"{statusLabel}&" : "";
+            urlQueries += (limitLabel != "") ? $"{limitLabel}&" : "";
+            urlQueries += (afterUntilKeyLabel != "" && afterUntilValueLabel != "") ? $"{afterUntilKeyLabel}" : "";
+            urlQueries += (afterUntilKeyLabel == "" || afterUntilValueLabel == "") ? "" : $"{afterUntilValueLabel}&";
+            urlQueries += (directionLabel != "") ? $"{directionLabel}" : "";
+            if (urlQueries[^1].ToString() == "&" || urlQueries[^1].ToString() == "?") {
+                urlQueries = (urlQueries == "?" || urlQueries == "&") ? "" : urlQueries.Substring(0, urlQueries.Length - 1);
+            }
             List<Order> batchOrders = new List<Order>();
-            //var ordersURL = $"{APCA_API_URL}/v2/orders?status=closed&limit=500&after={RequestStartDate}&direction=asc";
-            //var afterUntilTimeStamp = Convert.ToDateTime(afterUntilValue);
-            var afterUntilTimeStamp = (afterUntilValue.Contains(" ")) ? afterUntilValue.Substring(0, afterUntilValue.IndexOf(" ")) : afterUntilValue;
-            var ordersURL = $"{APCA_API_URL}/v2/orders?status={status}&limit={limit}&{afterUntilKey}={afterUntilTimeStamp}&direction={direction}";
+            //var ordersURL = $"{APCA_API_URL}/v2/orders?status={status}&limit={limit}&{afterUntilKey}={afterUntilValueLabel}&direction={direction}";
+            var ordersURL = $"{APCA_API_URL}/v2/orders{urlQueries}";
             var ordersResponse = _clientBroker.GetStringAsync(ordersURL).Result;
             var ordersInfo = JArray.Parse(ordersResponse).ToArray();
             for (var i = 0; i < ordersInfo.Length; i++)
@@ -88,8 +116,6 @@ namespace PortfolioPal
                 if (JObject.Parse(ordersInfo[i].ToString()).GetValue("status").ToString() == "filled")
                 {
                     var order = new Order();
-                    double p1 = 0;
-                    double p2 = 0;
                     order.orderID = JObject.Parse(ordersInfo[i].ToString()).GetValue("id").ToString();
                     order.clientOrderId = JObject.Parse(ordersInfo[i].ToString()).GetValue("client_order_id").ToString();
                     order.status = JObject.Parse(ordersInfo[i].ToString()).GetValue("status").ToString();
@@ -101,11 +127,11 @@ namespace PortfolioPal
                     order.filledQty = Convert.ToDouble(JObject.Parse(ordersInfo[i].ToString()).GetValue("filled_qty"));
                     order.qty = Convert.ToDouble(JObject.Parse(ordersInfo[i].ToString()).GetValue("qty"));
                     order.orderType = JObject.Parse(ordersInfo[i].ToString()).GetValue("order_type").ToString();
-                    double.TryParse(JObject.Parse(ordersInfo[i].ToString()).GetValue("filled_avg_price").ToString(), out p1);
-                    double.TryParse(JObject.Parse(ordersInfo[i].ToString()).GetValue("limit_price").ToString(), out p2);
+                    double.TryParse(JObject.Parse(ordersInfo[i].ToString()).GetValue("filled_avg_price").ToString(), out double p1);
+                    double.TryParse(JObject.Parse(ordersInfo[i].ToString()).GetValue("limit_price").ToString(), out double p2);
                     order.filledPrice = (p1 != p2 || (p1 != 0 && p2 != 0)) ? (p1 != 0) ? p1 : p2 : 0;
                     order.timeInForce = JObject.Parse(ordersInfo[i].ToString()).GetValue("time_in_force").ToString();
-                    order.extendedHours = Convert.ToBoolean(JObject.Parse(ordersInfo[i].ToString()).GetValue("extended_hours").ToString());                
+                    order.extendedHours = Convert.ToBoolean(JObject.Parse(ordersInfo[i].ToString()).GetValue("extended_hours").ToString());
                     batchOrders.Add(order);
                 }
             }
@@ -114,14 +140,14 @@ namespace PortfolioPal
 
         public void AddOrdersToDB(List<Order> orders)
         {
-            foreach (var o in orders){
+            foreach (var o in orders) {
                 _conn.Execute("INSERT INTO orders (orderID, clientOrderId, orderStatus, filledAt, symbol, side, assetID, assetClass, filledQty, qty, orderType, filledPrice, " +
-                    "timeInForce, extendedHours) VALUES (@orderID, @clientOrderId, @status, @filledAt, @symbol, @side, @assetID, @assetClass, @filledQty, @qty, @orderType, " + 
+                    "timeInForce, extendedHours) VALUES (@orderID, @clientOrderId, @status, @filledAt, @symbol, @side, @assetID, @assetClass, @filledQty, @qty, @orderType, " +
                     "@filledPrice, @timeInForce, @extendedHours) ON DUPLICATE KEY UPDATE orderID = orderID;",
-                new 
+                new
                 {
                     orderID = o.orderID, clientOrderId = o.clientOrderId, status = o.status, filledAt = o.filledAt, symbol = o.symbol, o.side,
-                    assetID = o.assetID, assetClass = o.assetClass, filledQty = o.filledQty, qty = o.qty, orderType = o.orderType, 
+                    assetID = o.assetID, assetClass = o.assetClass, filledQty = o.filledQty, qty = o.qty, orderType = o.orderType,
                     filledPrice = o.filledPrice, timeInForce = o.timeInForce, extendedHours = o.extendedHours
                 });
             }
@@ -140,63 +166,72 @@ namespace PortfolioPal
                 batchOrders = GetBatchOrders("closed", 500, "after", RequestStartDate, "asc");
                 if (batchOrders.Count() > 0) {
                     newRequestStartDate = batchOrders.Last().filledAt;
-                    AddOrdersToDB(batchOrders);
-                    batchOrders.Clear();
                     if (newRequestStartDate == RequestStartDate) {
                         getMore = false; }
                     else {
+                        AddOrdersToDB(batchOrders);
+                        batchOrders.Clear();
                         RequestStartDate = newRequestStartDate; }
-                } else { 
+                } else {
                     getMore = false; }
             } while (getMore);
         }
 
         public void GetNewFilledOrders()
         {
-            List<Order> batchOrders = new List<Order>();
+            List<Order> batchOrders;
+            string newRequestStartDate;
             var RequestStartDate = GetLatestOrderDB().filledAt;
             bool getMore = true;
             do {
                 batchOrders = GetBatchOrders("closed", 500, "after", RequestStartDate, "asc");
                 if (batchOrders.Count() > 0) {
-                    RequestStartDate = batchOrders.Last().filledAt;
-                    AddOrdersToDB(batchOrders);
-                    batchOrders.Clear();
-                } else { getMore = false; }
+                    newRequestStartDate = batchOrders.Last().filledAt;
+                    if (newRequestStartDate == RequestStartDate) {
+                        getMore = false; }
+                    else {
+                        AddOrdersToDB(batchOrders);
+                        batchOrders.Clear();
+                        RequestStartDate = newRequestStartDate; }
+                }
+                else {
+                    getMore = false; }
             } while (getMore);
         }
 
         public Order GetLatestOrderDB()
         {
             CheckForTable();
-            return _conn.QuerySingle<Order>("SELECT * FROM orders ORDER BY filledAt DESC LIMIT 1");
+            return _conn.QuerySingle<Order>("SELECT * FROM orders ORDER BY orderIndex DESC LIMIT 1");
         }
-        public void GetLatestOrdersBroker(int numRecents = 25)
+        public void GetLatestOrdersBroker(int numRecents = 100)
         {
-            RecentFilledOrders = GetBatchOrders("filled", numRecents, "until", DateTime.Today.ToShortDateString(), "desc");
+            //RecentFilledOrders = GetBatchOrders("filled", numRecents, "until", DateTime.Today.ToShortDateString(), "desc");
+            //RecentFilledOrders = GetBatchOrders("", numRecents, "", "", "");
+            RecentFilledOrders = GetBatchOrders();
         }
 
         public IEnumerable<Order> ReadLatestOrdersDB(int qty)
         {
             CheckForTable();
-            return _conn.Query<Order>($"SELECT * FROM orders ORDER BY filledAt DESC LIMIT {qty}");
+            return _conn.Query<Order>($"SELECT * FROM orders ORDER BY orderIndex DESC LIMIT {qty}");
         }
 
         public IEnumerable<Order> ReadAllOrdersDB()
         {
             CheckForTable();
-            return _conn.Query<Order>($"SELECT * FROM orders;");
+            return _conn.Query<Order>($"SELECT * FROM orders ORDER BY orderIndex DESC;");
         }
 
         public IEnumerable<Order> ReadAssetOrders(string asset)
         {
             CheckForTable();
-            return _conn.Query<Order>($"SELECT * FROM orders WHERE symbol = {asset} ORDER BY filledAt DESC;");
+            return _conn.Query<Order>($"SELECT * FROM orders WHERE symbol = {asset} ORDER BY orderIndex DESC;");
         }
 
-        public void GetNumTradedAssetsDB(){
+        public void GetNumTradedAssetsDB() {
             CheckForTable();
-            NumAssetsTraded = (int.TryParse(_conn.ExecuteScalar<string>("SELECT COUNT(DISTINCT symbol) FROM orders;"), out int num )) ? num : 0 ;
+            NumAssetsTraded = (int.TryParse(_conn.ExecuteScalar<string>("SELECT COUNT(DISTINCT symbol) FROM orders;"), out int num)) ? num : 0;
         }
 
         public void CalcTotalTraded()
@@ -238,7 +273,9 @@ namespace PortfolioPal
 
 
 
-        /* save this for later when youre smarter and add all this extra stuff to make it work. fool.
+
+
+
 
 
         public void CalcAssetTotalTraded(Asset asset)
@@ -248,17 +285,17 @@ namespace PortfolioPal
 
         public void CalcAssetNumberTrades(Asset asset)
         {
-            asset.NumberTrades = Convert.ToDouble(_conn.ExecuteScalar($"SELECT COUNT(*) FROM orders WHERE symbol = {asset.symbol}"));
+            asset.NumberTrades = Convert.ToInt32(_conn.ExecuteScalar($"SELECT COUNT(*) FROM orders WHERE symbol = {asset.symbol}"));
         }
 
         public void CalcAssetNumberBuys(Asset asset)
         {
-            asset.NumberBuys = Convert.ToDouble(_conn.ExecuteScalar($"SELECT COUNT(*) FROM orders WHERE symbol = {asset.symbol} and side = 'buy'"));
+            asset.NumberBuys = Convert.ToInt32(_conn.ExecuteScalar($"SELECT COUNT(*) FROM orders WHERE symbol = {asset.symbol} and side = 'buy'"));
         }
 
         public void CalcAssetNumberSells(Asset asset)
         {
-            asset.NumberSells = Convert.ToDouble(_conn.ExecuteScalar($"SELECT COUNT(*) FROM orders WHERE symbol = {asset.symbol} and side = 'sell'"));
+            asset.NumberSells = Convert.ToInt32(_conn.ExecuteScalar($"SELECT COUNT(*) FROM orders WHERE symbol = {asset.symbol} and side = 'sell'"));
         }
 
         public void CalcAssetTotalPLD(Asset asset)
@@ -275,19 +312,23 @@ namespace PortfolioPal
 
         public void GetAllTradedAssets()
         {
-            AllTradedAssets = _conn.Query<Asset>("SELECT distinct symbols from tradeassets").ToList();
+            AllTradedAssets = _conn.Query<Asset>("SELECT distinct symbols from tradedassets").ToList();
         }
 
-        public void UpdateAssetStats()
+        public List<string> ReadAllTradedAssetsFromOrders()
         {
-            foreach (var asset in AllTradedAssets){
-                CalcAssetTotalTraded(asset);
-                CalcAssetNumberTrades(asset);
-                CalcAssetNumberBuys(asset);
-                CalcAssetNumberSells(asset);
-                CalcAssetTotalPLD(asset);
-                UpdateAssetTotalPLP(asset);        
-            }
+            return _conn.Query<string>("SELECT distinct symbols from orders").ToList();
+        }
+
+
+        public void UpdateAssetStats(Asset asset)
+        {
+            CalcAssetTotalTraded(asset);
+            CalcAssetNumberTrades(asset);
+            CalcAssetNumberBuys(asset);
+            CalcAssetNumberSells(asset);
+            CalcAssetTotalPLD(asset);
+            UpdateAssetTotalPLP(asset);
         }
 
         public void UpdateAllAssetStats()
@@ -301,11 +342,14 @@ namespace PortfolioPal
         public void UpdateAllOrders()
         {
             GetNewFilledOrders();
-            UpdateAssetStats();
+            GetAllTradedAssets();
+            foreach (var a in AllTradedAssets){
+                UpdateAssetStats(a);
+            }
             UpdateAllAssetStats();
-        }
+            // now what?!
 
-        */
+        }
 
     }
 }

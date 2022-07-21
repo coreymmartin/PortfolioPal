@@ -289,69 +289,34 @@ namespace PortfolioPal
             var iexStatsURL = $"{IEX_API_URL}/stable/stock/{asset.symbol}/stats/?token={IEX_API_KEY}";
             var iexStatsResponse = AwaitClientGetReponse(_clientIEX, iexStatsURL);
             var iexStats = JObject.Parse(iexStatsResponse.Result.ToString()).ToString();
-            try
-            {
-                asset.companyName = JObject.Parse(iexStats).GetValue("companyName").ToString();
-                asset.marketCap = GetDoubleJObj(iexStats, "marketcap");
-                asset.week52High = GetDoubleJObj(iexStats, "week52high");
-                asset.week52Low = GetDoubleJObj(iexStats, "week52low");
-                asset.week52Change = GetDoubleJObj(iexStats, "week52change");
-                asset.avg10Volume = GetDoubleJObj(iexStats, "avg10Volume");
-                asset.avg30Volume = GetDoubleJObj(iexStats, "avg30Volume");
-                asset.day200MovingAvg = GetDoubleJObj(iexStats, "day200MovingAvg");
-                asset.day50MovingAvg = GetDoubleJObj(iexStats, "day50MovingAvg");
-                asset.employees = GetDoubleJObj(iexStats, "employees");
-                asset.ttmEPS = GetDoubleJObj(iexStats, "ttmEPS");
-                asset.ttmDividendRate = GetDoubleJObj(iexStats, "ttmDividendRate");
-                asset.dividendYield = GetDoubleJObj(iexStats, "dividendYield");
-                asset.nextDividendDate = JObject.Parse(iexStats).GetValue("nextDividendDate").ToString();
-                asset.exDividendDate = JObject.Parse(iexStats).GetValue("exDividendDate").ToString();
-                asset.dividendFrequency = CalculateFrequency(asset);
-                asset.peRatio = GetDoubleJObj(iexStats, "peRatio");
-                asset.beta = GetDoubleJObj(iexStats, "beta");
-                asset.maxChangePercent = GetDoubleJObj(iexStats, "maxChangePercent");
-                asset.year5ChangePercent = GetDoubleJObj(iexStats, "year5ChangePercent");
-                asset.year2ChangePercent = GetDoubleJObj(iexStats, "year2ChangePercent");
-                asset.year1ChangePercent = GetDoubleJObj(iexStats, "year1ChangePercent");
-                asset.ytdChangePercent = GetDoubleJObj(iexStats, "ytdChangePercent");
-                asset.month6ChangePercent = GetDoubleJObj(iexStats, "month6ChangePercent");
-                asset.month3ChangePercent = GetDoubleJObj(iexStats, "month3ChangePercent");
-                asset.month1ChangePercent = GetDoubleJObj(iexStats, "month1ChangePercent");
-                asset.day30ChangePercent = GetDoubleJObj(iexStats, "day30ChangePercent");
-                asset.day5ChangePercent = GetDoubleJObj(iexStats, "day5ChangePercent");
-            }
-            catch
-            {
-                asset.companyName = "companyName";
-                asset.marketCap = 0;
-                asset.week52High = 0;
-                asset.week52Low = 0;
-                asset.week52Change = 0;
-                asset.avg10Volume = 0;
-                asset.avg30Volume = 0;
-                asset.day200MovingAvg = 0;
-                asset.day50MovingAvg = 0;
-                asset.employees = 0;
-                asset.ttmEPS = 0;
-                asset.ttmDividendRate = 0;
-                asset.dividendYield = 0;
-                asset.nextDividendDate = JObject.Parse(iexStats).GetValue("nextDividendDate").ToString();
-                asset.exDividendDate = JObject.Parse(iexStats).GetValue("exDividendDate").ToString();
-                asset.dividendFrequency = CalculateFrequency(asset);
-                asset.peRatio = GetDoubleJObj(iexStats, "peRatio");
-                asset.beta = GetDoubleJObj(iexStats, "beta");
-                asset.maxChangePercent = GetDoubleJObj(iexStats, "maxChangePercent");
-                asset.year5ChangePercent = GetDoubleJObj(iexStats, "year5ChangePercent");
-                asset.year2ChangePercent = GetDoubleJObj(iexStats, "year2ChangePercent");
-                asset.year1ChangePercent = GetDoubleJObj(iexStats, "year1ChangePercent");
-                asset.ytdChangePercent = GetDoubleJObj(iexStats, "ytdChangePercent");
-                asset.month6ChangePercent = GetDoubleJObj(iexStats, "month6ChangePercent");
-                asset.month3ChangePercent = GetDoubleJObj(iexStats, "month3ChangePercent");
-                asset.month1ChangePercent = GetDoubleJObj(iexStats, "month1ChangePercent");
-                asset.day30ChangePercent = GetDoubleJObj(iexStats, "day30ChangePercent");
-                asset.day5ChangePercent = GetDoubleJObj(iexStats, "day5ChangePercent");
-
-            }
+            asset.companyName = (JObject.Parse(iexStats).ContainsKey("companyName")) ? JObject.Parse(iexStats).GetValue("companyName").ToString() : "whoops";
+            asset.marketCap = (JObject.Parse(iexStats).ContainsKey("marketcap")) ? GetDoubleJObj(iexStats, "marketcap") : 0;
+            asset.week52High = (JObject.Parse(iexStats).ContainsKey("week52high")) ? GetDoubleJObj(iexStats, "week52high") : 0;
+            asset.week52Low = (JObject.Parse(iexStats).ContainsKey("week52low")) ? GetDoubleJObj(iexStats, "week52low") : 0;
+            asset.week52Change = (JObject.Parse(iexStats).ContainsKey("week52change")) ? GetDoubleJObj(iexStats, "week52change") : 0;
+            asset.avg10Volume = (JObject.Parse(iexStats).ContainsKey("avg10Volume")) ? GetDoubleJObj(iexStats, "avg10Volume") : 0;
+            asset.avg30Volume = (JObject.Parse(iexStats).ContainsKey("avg30Volume")) ? GetDoubleJObj(iexStats, "avg30Volume") : 0;
+            asset.day200MovingAvg = (JObject.Parse(iexStats).ContainsKey("day200MovingAvg")) ? GetDoubleJObj(iexStats, "day200MovingAvg") : 0;
+            asset.day50MovingAvg = (JObject.Parse(iexStats).ContainsKey("day50MovingAvg")) ? GetDoubleJObj(iexStats, "day50MovingAvg") : 0;
+            asset.employees = (JObject.Parse(iexStats).ContainsKey("employees")) ? GetDoubleJObj(iexStats, "employees") : 0;
+            asset.ttmEPS = (JObject.Parse(iexStats).ContainsKey("ttmEPS")) ? GetDoubleJObj(iexStats, "ttmEPS") : 0;
+            asset.ttmDividendRate = (JObject.Parse(iexStats).ContainsKey("ttmDividendRate")) ? GetDoubleJObj(iexStats, "ttmDividendRate") : 0;
+            asset.dividendYield = (JObject.Parse(iexStats).ContainsKey("dividendYield")) ? GetDoubleJObj(iexStats, "dividendYield") : 0;
+            asset.nextDividendDate = (JObject.Parse(iexStats).ContainsKey("nextDividendDate")) ? JObject.Parse(iexStats).GetValue("nextDividendDate").ToString() : "";
+            asset.exDividendDate = (JObject.Parse(iexStats).ContainsKey("exDividendDate")) ? JObject.Parse(iexStats).GetValue("exDividendDate").ToString() : "";
+            asset.dividendFrequency = CalculateFrequency(asset);
+            asset.peRatio = (JObject.Parse(iexStats).ContainsKey("peRatio")) ? GetDoubleJObj(iexStats, "peRatio") : 0;
+            asset.beta = (JObject.Parse(iexStats).ContainsKey("beta")) ? GetDoubleJObj(iexStats, "beta") : 0;
+            asset.maxChangePercent = (JObject.Parse(iexStats).ContainsKey("maxChangePercent")) ? GetDoubleJObj(iexStats, "maxChangePercent") : 0;
+            asset.year5ChangePercent = (JObject.Parse(iexStats).ContainsKey("year5ChangePercent")) ? GetDoubleJObj(iexStats, "year5ChangePercent") : 0;
+            asset.year2ChangePercent = (JObject.Parse(iexStats).ContainsKey("year2ChangePercent")) ? GetDoubleJObj(iexStats, "year2ChangePercent") : 0;
+            asset.year1ChangePercent = (JObject.Parse(iexStats).ContainsKey("year1ChangePercent")) ? GetDoubleJObj(iexStats, "year1ChangePercent") : 0;
+            asset.ytdChangePercent = (JObject.Parse(iexStats).ContainsKey("ytdChangePercent")) ? GetDoubleJObj(iexStats, "ytdChangePercent") : 0;
+            asset.month6ChangePercent = (JObject.Parse(iexStats).ContainsKey("month6ChangePercent")) ? GetDoubleJObj(iexStats, "month6ChangePercent") : 0;
+            asset.month3ChangePercent = (JObject.Parse(iexStats).ContainsKey("month3ChangePercent")) ? GetDoubleJObj(iexStats, "month3ChangePercent") : 0;
+            asset.month1ChangePercent = (JObject.Parse(iexStats).ContainsKey("month1ChangePercent")) ? GetDoubleJObj(iexStats, "month1ChangePercent") : 0;
+            asset.day30ChangePercent = (JObject.Parse(iexStats).ContainsKey("day30ChangePercent")) ? GetDoubleJObj(iexStats, "day30ChangePercent") : 0;
+            asset.day5ChangePercent = (JObject.Parse(iexStats).ContainsKey("day5ChangePercent")) ? GetDoubleJObj(iexStats, "day5ChangePercent") : 0;
         }
 
         public List<Potential> GetBatchIEXStats(IEnumerable<Potential> assets, int creditCost = 5)

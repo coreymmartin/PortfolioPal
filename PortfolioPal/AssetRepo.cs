@@ -36,6 +36,10 @@ namespace PortfolioPal
         public List<string> DividendAssets {get; set;}
 
 
+        public List<Asset> AllTradedAssets {get; set;}
+        public List<string> AllTradedAssetsSymbols {get; set;}
+
+
 
         public AssetRepo ()
         {
@@ -46,7 +50,6 @@ namespace PortfolioPal
             var config = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json").Build();
             string connString = config.GetConnectionString("portfoliopal");
             _conn = new MySqlConnection(connString);
-            // do we need to close this connection? maybe so? because then we keep openning new ones?
         }
         
 
@@ -54,7 +57,6 @@ namespace PortfolioPal
         {
             return await client.GetStringAsync(url);   
         }
-
 
         public List<Asset> GetAllTradableAssets()
         {
@@ -101,7 +103,6 @@ namespace PortfolioPal
             }
             return fileContent.ToList();
         }
-
         public void SetUserSelectedDB()
         {
             UserSelectedAssetsRequired = ReadUserSelectedFile("required");
@@ -115,8 +116,6 @@ namespace PortfolioPal
                 _conn.Execute("INSERT INTO userselectedassets (symbol, assetClass, classification) VALUES (@symbol, @assetClass, @classification);",
                 new { symbol = asset, assetClass = "us_equity", classification = "useroptional" });
         }
-
-
         public List<string> GetUserSelectedRequiredDB()
         {
             SetUserSelectedDB();
@@ -127,8 +126,6 @@ namespace PortfolioPal
             SetUserSelectedDB();
             return UserSelectedAssetsOptional;
         }
-
-
         public IEnumerable<string> GetUserSelectedRequired()
         {
             if (UserSelectedAssetsRequired == null){
@@ -142,6 +139,131 @@ namespace PortfolioPal
                 UserSelectedAssetsOptional = GetUserSelectedOptionalDB();
             }
             return UserSelectedAssetsOptional;
+        }
+  
+        public void CreateTradedAssetTable()
+        {
+            _conn.Execute("DROP TABLE IF EXISTS `tradedassets`; " +
+                "CREATE TABLE `tradedassets`( " +
+                    "`assetID` VARCHAR(100) PRIMARY KEY, " +
+                    "`symbol` VARCHAR(10), " +
+                    "`exchange` VARCHAR(25), " +
+                    "`assetClass` VARCHAR(25), " +
+                    "`shortable` TINYINT, " +
+                    "`qty` FLOAT(10), " +
+                    "`side` VARCHAR(25), " +
+                    "`marketValue` FLOAT(10), " +
+                    "`costBasis` FLOAT(10), " +
+                    "`plDollarsTotal` FLOAT(10), " +
+                    "`plPercentTotal` FLOAT(10), " +
+                    "`plDollarsToday` FLOAT(10), " +
+                    "`plPercentToday` FLOAT(10), " +
+                    "`price` FLOAT(10), " +
+                    "`lastPrice` FLOAT(10), " +
+                    "`changeToday` FLOAT(10), " +
+                    "`TotalTraded` FLOAT(10), " +
+                    "`NumberTrades` FLOAT(10), " +
+                    "`NumberBuys` FLOAT(10), " +
+                    "`NumberSells` FLOAT(10), " +
+                    "`TotalPLP` FLOAT(10), " +
+                    "`TotalPLD` FLOAT(10), " +
+	                "`priceBaseline` FLOAT(10), " +
+                    "`assetPLP` FLOAT(10), " +
+                    "`performance` FLOAT(10), " +
+                    "`created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
+                    "`updated` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP " +
+                ");");
+        }
+
+        public IEnumerable<Asset> GetAllTradedAssetsDB(){
+            return _conn.Query<Asset>("SELECT * FROM tradedassets;");
+        }
+
+        public List<string> GetAllTradedSymbolsDB()
+        {
+            return _conn.Query<string>("SELECT DISTICT symbol from tradedassets").ToList();
+        }
+        
+        public Asset GetTradedAssetDB(string symbol){
+            return _conn.QuerySingle<Asset>($"SELECT * FROM tradedassets where symbol = {symbol};");
+        }
+  
+        public void AddTradedAssetToDB(Asset asset)
+        {
+            asset.priceBaseline = (asset.priceBaseline == null || asset.priceBaseline == 0) ? (asset.price != 0) ? asset.price : 0 : asset.priceBaseline; 
+            _conn.Execute("INSERT INTO tradedassets (assetID, symbol, exchange, assetClass, shortable, qty, side, marketValue, costBasis, " +
+                "plDollarsTotal, plPercentTotal, plDollarsToday, plPercentToday, price, lastPrice, changeToday, priceBaseline, assetPLP, " +
+                "TotalTraded, NumberTrades, NumberBuys, NumberSells, TotalPLP, TotalPLD, performance) " + 
+                " VALUES (@assetID, @symbol, @exchange, @assetClass, @shortable, @qty, @side, @marketValue, @costBasis, @plDollarsTotal, " +
+                "@plPercentTotal, @plDollarsToday, @plPercentToday, @price, @lastPrice, @changeToday, @priceBaseline, @assetPLP, @TotalTraded, " +
+                "@NumberTrades, @NumberBuys, @NumberSells, @TotalPLP, @TotalPLD, @performance) " + 
+                " ON DUPLICATE KEY UPDATE orderID = orderID;",
+            new
+            {
+                assetID = asset.assetID, symbol = asset.symbol, exchange = asset.exchange, assetClass = asset.assetClass, 
+                shortable = asset.shortable, qty = asset.qty, side = asset.side, marketValue = asset.marketValue, costBasis = asset.costBasis, 
+                plDollarsTotal = asset.plDollarsTotal, plPercentTotal = asset.plPercentTotal, plDollarsToday = asset.plDollarsToday, 
+                plPercentToday = asset.plPercentToday, price = asset.price, lastPrice = asset.lastPrice, changeToday = asset.changeToday, 
+                priceBaseline = asset.priceBaseline, assetPLP = asset.assetPLP, TotalTraded = asset.TotalTraded, 
+                NumberTrades = asset.NumberTrades, NumberBuys = asset.NumberBuys, NumberSells = asset.NumberSells, 
+                TotalPLP = asset.TotalPLP, TotalPLD = asset.TotalPLD, performance = asset.performance 
+            });
+        }
+        // maybe do common stts update here. to update stock/asset plp and perf - we can do it all the time whenever we want to update cool. 
+  
+        public void UpdateDailyStatsDB(Asset asset)
+        {
+            _conn.Execute("UPDATE tradedassets SET qty = @qty, side = @side, marketValue = @marketValue, costBasis = @costBasis, " +
+                "plDollarsTotal = @plDollarsTotal, plPercentTotal = @plPercentTotal, plDollarsToday = @plDollarsToday, " +
+                "plPercentToday = @plPercentToday, price = @price, lastPrice = @lastPrice, changeToday = @changeToday, " +
+                "assetPLP = @assetPLP WHERE assetID = @assetID", 
+                new { qty = asset.qty, side = asset.side, marketValue = asset.marketValue, costBasis = asset.costBasis, 
+                    plDollarsTotal = asset.plDollarsTotal, plPercentTotal = asset.plPercentTotal, plDollarsToday = asset.plDollarsToday, 
+                    plPercentToday = asset.plPercentToday, price = asset.price, lastPrice = asset.lastPrice, changeToday = asset.changeToday, 
+                    assetPLP = asset.assetPLP, assetID = asset.assetID });
+        }
+  
+        public void UpdateRunningStatsDB(Asset asset)
+        {
+
+            _conn.Execute("UPDATE tradedassets SET TotalTraded = @TotalTraded, NumberTrades = @NumberTrades, NumberBuys = @NumberBuys, " +
+                "NumberSells = @NumberSells, TotalPLP = @TotalPLP, TotalPLD = @TotalPLD, performance = @performance WHERE assetID = @assetID", 
+                new { TotalTraded = asset.TotalTraded, NumberTrades = asset.NumberTrades, NumberBuys = asset.NumberBuys, 
+                    NumberSells = asset.NumberSells, TotalPLP = asset.TotalPLP, TotalPLD = asset.TotalPLD, performance = asset.performance,  
+                    assetID = asset.assetID });
+        }
+
+        public void UpdateAllAssetStatsDB(Asset asset)
+        {
+            _conn.Execute("UPDATE tradedassets SET qty = @qty, side = @side, marketValue = @marketValue, costBasis = @costBasis, " +
+                "plDollarsTotal = @plDollarsTotal, plPercentTotal = @plPercentTotal, plDollarsToday = @plDollarsToday, " +
+                "plPercentToday = @plPercentToday, price = @price, lastPrice = @lastPrice, changeToday = @changeToday, " +
+                "assetPLP = @assetPLP, TotalTraded = @TotalTraded, NumberTrades = @NumberTrades, NumberBuys = @NumberBuys, " +
+                "NumberSells = @NumberSells, TotalPLP = @TotalPLP, TotalPLD = @TotalPLD, performance = @performance " +
+                "WHERE assetID = @assetID",
+                new
+                {
+                    qty = asset.qty,
+                    side = asset.side,
+                    marketValue = asset.marketValue,
+                    costBasis = asset.costBasis,
+                    plDollarsTotal = asset.plDollarsTotal,
+                    plPercentTotal = asset.plPercentTotal,
+                    plDollarsToday = asset.plDollarsToday,
+                    plPercentToday = asset.plPercentToday,
+                    price = asset.price,
+                    lastPrice = asset.lastPrice,
+                    changeToday = asset.changeToday,
+                    assetPLP = asset.assetPLP,
+                    TotalTraded = asset.TotalTraded,
+                    NumberTrades = asset.NumberTrades,
+                    NumberBuys = asset.NumberBuys,
+                    NumberSells = asset.NumberSells,
+                    TotalPLP = asset.TotalPLP,
+                    TotalPLD = asset.TotalPLD,
+                    performance = asset.performance,
+                    assetID = asset.assetID
+                });
         }
     }
 }

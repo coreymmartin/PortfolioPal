@@ -22,6 +22,10 @@
         public double lastPrice { get; set; }
         public double changeToday { get; set; }
     
+        public double? priceBaseline {get; set;}
+        public double assetPLP { get; set; }
+
+
     # endregion
 
     # region asset stats (from orders) (broker)
@@ -32,6 +36,10 @@
         public int NumberSells { get; set; }
         public double TotalPLP { get; set; }
         public double TotalPLD { get; set; }
+
+
+
+        public double performance { get; set; } 
     
     
     
