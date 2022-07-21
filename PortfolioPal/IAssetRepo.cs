@@ -9,6 +9,12 @@ namespace PortfolioPal
         //public string[] GetAllTradeableAssets();
         //public IEnumerable<Asset> GetAsset();
 
+        public IEnumerable<Asset> GetAllTradedAssetsDB();
+        public Asset GetTradedAssetDB(string symbol);
+
+        public List<string> GetAllTradedSymbolsDB();
+
+        public void AddTradedAssetToDB(Asset asset);
 
     }
 }

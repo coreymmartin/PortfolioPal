@@ -31,9 +31,9 @@ namespace PortfolioPal
             _clientBroker.DefaultRequestHeaders.Add("APCA-API-KEY-ID", APCA_API_KEY);
             _clientBroker.DefaultRequestHeaders.Add("APCA-API-SECRET-KEY", APCA_API_SECRET);
      
-            var config = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json").Build();
-            string connString = config.GetConnectionString("portfoliopal");
-            _conn = new MySqlConnection(connString);
+            //var config = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json").Build();
+            //string connString = config.GetConnectionString("portfoliopal");
+            //_conn = new MySqlConnection(connString);
             // do we need to close this connection? maybe so? because then we keep openning new ones?
         }
 
@@ -117,21 +117,32 @@ namespace PortfolioPal
             p.cryptoHoldingActual   = cryptoHolding;
         }
 
-        public void GetPortfolioHistory(string period = "1D", string timeframe = "15Min")
+        public List<PieDataPoint> GetDiversityChartValues(Portfolio p){
+            List<PieDataPoint> pieData = new List<PieDataPoint>();
+            pieData.Add(new PieDataPoint("Stocks", p.stockHoldingActual));
+            pieData.Add(new PieDataPoint("Dividends",10));
+            pieData.Add(new PieDataPoint("Crypto", p.cryptoHoldingActual));
+            return pieData;
+        }
+
+        public PortfolioHistory GetPortfolioHistory(string period = "1D", string timeframe = "15Min")
         {
             if (!okPeriod.Contains(period))
                 period = "1D";
             if (!okTimeframe.Contains(timeframe))
                 timeframe = "15Min";
+            var hist = new PortfolioHistory();
             var historyURL = $"{APCA_API_URL}/v2/account/portfolio/history?period={period}&timeframe={timeframe}";
             var historyResponse = _clientBroker.GetStringAsync(historyURL).Result;
-            var historyTimestamp = JArray.Parse(JObject.Parse(historyResponse).GetValue("timestamp").ToString()).ToArray();
-            var historyEquity = JArray.Parse(JObject.Parse(historyResponse).GetValue("equity").ToString()).ToArray();
-            var historyPL = JArray.Parse(JObject.Parse(historyResponse).GetValue("profit_loss").ToString()).ToArray();
-            var historyPLP = JArray.Parse(JObject.Parse(historyResponse).GetValue("profit_loss_pct").ToString()).ToArray();
-            var historyBaseValue = JObject.Parse(historyResponse).GetValue("base_value").ToString();
-            var historyTimeframe = JObject.Parse(historyResponse).GetValue("timeframe").ToString();
+            
+            ///////hist.Timestamp = JArray.Parse(JObject.Parse(historyResponse).GetValue("timestamp").ToString()).ToArray();
+            ///////hist.Equity = JArray.Parse(JObject.Parse(historyResponse).GetValue("equity").ToString()).ToArray();
+            ///////hist.PL = JArray.Parse(JObject.Parse(historyResponse).GetValue("profit_loss").ToString()).ToArray();
+            ///////hist.PLP = JArray.Parse(JObject.Parse(historyResponse).GetValue("profit_loss_pct").ToString()).ToArray();
+            ///////hist.BaseValue = JObject.Parse(historyResponse).GetValue("base_value").ToString();
+            ///////hist.Timeframe = JObject.Parse(historyResponse).GetValue("timeframe").ToString();
             // so you have all this data but youre not sure what to do with it yet. but you have it!
+            return hist;
         }
 
         public void CheckMarketOpen(Portfolio p)

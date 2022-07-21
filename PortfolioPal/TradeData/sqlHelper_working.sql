@@ -43,6 +43,7 @@ CREATE TABLE `potentials` (
 
 DROP TABLE IF EXISTS `orders`;
 CREATE TABLE `orders`(
+	`orderIndex` INT AUTO_INCREMENT PRIMARY KEY,
 	`symbol` VARCHAR(10),
 	`filledQty` FLOAT(10),
 	`filledPrice` Float(10),
@@ -51,16 +52,16 @@ CREATE TABLE `orders`(
 	`orderType` VARCHAR(25),
 	`orderStatus` VARCHAR(25),
 	`extendedHours` TINYINT,
-	`filledAt` VARCHAR(50),
+	`filledAt` VARCHAR(25),
 	`timeInForce` VARCHAR(25),
 	`qty` FLOAT(10),
 	`assetID` VARCHAR(100),
 	`clientOrderID` VARCHAR(100),
-	`orderID` VARCHAR(100) PRIMARY KEY
+	`orderID` VARCHAR(100)
 );
 
-DROP TABLE IF EXISTS `tradeassets`;
-CREATE TABLE `tradeassets`(
+DROP TABLE IF EXISTS `tradedassets`;
+CREATE TABLE `tradedassets`(
 	`assetID` VARCHAR(100) PRIMARY KEY,
 	`symbol` VARCHAR(10),
 	`exchange` VARCHAR(25),
@@ -83,6 +84,10 @@ CREATE TABLE `tradeassets`(
 	`NumberSells` FLOAT(10),
 	`TotalPLP` FLOAT(10),
 	`TotalPLD` FLOAT(10),
+	`priceBaseline` FLOAT(10),
+    `assetPLP` FLOAT(10),
+    `performance` FLOAT(10),
+    `created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	`updated` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 

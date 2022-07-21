@@ -13,7 +13,12 @@ namespace PortfolioPal.Controllers
     public class OrdersController : Controller
     {
 
-        public IOrderRepo repo = new OrderRepo();
+        private readonly IOrderRepo repo;
+
+        public OrdersController(IOrderRepo repo)
+        {
+            this.repo = repo;
+        }
 
         public IActionResult Index()
         {
@@ -42,7 +47,8 @@ namespace PortfolioPal.Controllers
 
         public IActionResult UpdateOrders()
         {
-            return RedirectToAction("Index");
+            repo.GetNewFilledOrders();
+            return RedirectToAction("DisplayAllOrders");
         }
     }
 }

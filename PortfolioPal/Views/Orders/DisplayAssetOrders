@@ -9,7 +9,6 @@
                 <th>status</th>
                 <th>filledAt</th>
                 <th>symbol</th>
-                <th>assetID</th>
                 <th>assetClass</th>
                 <th>filledQty</th>
                 <th>qty</th>
@@ -25,7 +24,6 @@
                 <td>@o.status</td>
                 <td>@o.filledAt</td>
                 <td>@o.symbol</td>
-                <td>@o.assetID</td>
                 <td>@o.assetClass</td>
                 <td>@o.filledQty</td>
                 <td>@o.qty</td>

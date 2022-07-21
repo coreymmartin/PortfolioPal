@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using PortfolioPal.Models;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ namespace PortfolioPal.Controllers
             repo.CheckMarketOpen(p);
             repo.GetAllPortfolioPositions(p);
             repo.UpdatePortfolioDiversity(p);
-            repo.GetPortfolioHistory();
+            var pData = repo.GetDiversityChartValues(p);
             return View(p);
         }
 

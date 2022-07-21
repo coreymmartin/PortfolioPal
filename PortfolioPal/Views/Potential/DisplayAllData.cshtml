@@ -12,32 +12,33 @@
    
 <div id="testing-screener">
     <h3>All Potential Data</h3>
-    <table class="table">
+    <table class="table table-striped responsive">
         <tr>
             <th>Score</th>
             <th>Symbol</th>
             <th>Price</th>
             <th>Company</th>
             <th>MarketCap</th>
-            <th>1Yr H</th>
-            <th>1Yr L</th>
-            <th>1Yr Chg</th>
-            <th>30D AvgV</th>
+            <th>1YrH</th>
+            <th>1YrL</th>
+            <th>1YrChg</th>
+            <th>10DAvgV</th>
+            <th>30DAvgV</th>
             <th>EPS</th>
-            <th>Div Rate</th>
-            <th>Div Yield</th>
-            <th>next Div</th>
-            <th>Last Div</th>
-            <th>Div freq</th>
+            <th>DivRate</th>
+            <th>DivYield</th>
+            <th>nextDiv</th>
+            <th>LastDiv</th>
+            <th>Divfreq</th>
             <th>PE</th>
             <th>beta</th>
-            <th>5Yr % Chg</th>
-            <th>1Yr % Chg</th>
-            <th>6M % Chg</th>
-            <th>3M % Chg</th>
-            <th>1M % Chg</th>
-            <th>30D % Chg</th>
-            <th>5D % Chg</th>
+            <th>5Yr%Chg</th>
+            <th>1Yr%Chg</th>
+            <th>6M%Chg</th>
+            <th>3M%Chg</th>
+            <th>1M%Chg</th>
+            <th>30D%Chg</th>
+            <th>5D%Chg</th>
             <th>Exchange</th>
             <th>Class</th>
             <th>Updated</th>
@@ -47,28 +48,29 @@
             <tr>
                 <td>@m.score</td>
                 <td>@m.symbol</td>
-                <td>@m.price</td>
+                <td>@Math.Round(@m.price, 5)</td>
                 <td>@m.companyName</td>
                 <td>@m.marketCap</td>
-                <td>@m.week52High</td>
-                <td>@m.week52Low</td>
-                <td>@m.week52Change</td>
-                <td>@m.avg30Volume</td>
-                <td>@m.ttmEPS</td>
-                <td>@m.ttmDividendRate</td>
-                <td>@m.dividendYield</td>
+                <td>@Math.Round(@m.week52High, 5)</td>
+                <td>@Math.Round(@m.week52Low, 5)</td>
+                <td>@Math.Round(@m.week52Change, 5)</td>
+                <td>@Math.Round(@m.avg30Volume, 5)</td>
+                <td>@Math.Round(@m.avg10Volume, 5)</td>
+                <td>@Math.Round(@m.ttmEPS, 5)</td>
+                <td>@Math.Round(@m.ttmDividendRate, 5)</td>
+                <td>@Math.Round(@m.dividendYield, 5)</td>
                 <td>@m.nextDividendDate</td>
                 <td>@m.exDividendDate</td>
-                <td>@m.dividendFrequency</td>
-                <td>@m.peRatio</td>
-                <td>@m.beta</td>
-                <td>@m.year5ChangePercent</td>
-                <td>@m.year1ChangePercent</td>
-                <td>@m.month6ChangePercent</td>
-                <td>@m.month3ChangePercent</td>
-                <td>@m.month1ChangePercent</td>
-                <td>@m.day30ChangePercent</td>
-                <td>@m.day5ChangePercent</td>
+                <td>@Math.Round(@m.dividendFrequency, 5)</td>
+                <td>@Math.Round(@m.peRatio, 5)</td>
+                <td>@Math.Round(@m.beta, 5)</td>
+                <td>@Math.Round(@m.year5ChangePercent, 5)</td>
+                <td>@Math.Round(@m.year1ChangePercent, 5)</td>
+                <td>@Math.Round(@m.month6ChangePercent, 5)</td>
+                <td>@Math.Round(@m.month3ChangePercent, 5)</td>
+                <td>@Math.Round(@m.month1ChangePercent, 5)</td>
+                <td>@Math.Round(@m.day30ChangePercent, 5)</td>
+                <td>@Math.Round(@m.day5ChangePercent, 5)</td>
                 <td>@m.exchange</td>
                 <td>@m.assetClass</td>
                 <td>@m.updated</td>

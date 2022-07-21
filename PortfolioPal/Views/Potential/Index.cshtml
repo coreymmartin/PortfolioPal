@@ -11,7 +11,7 @@
 </ul>
    
 <div id = "table-summaries">
-    <table class="table">
+    <table class="table table-striped responsive">
         <tr>
             <th>Updated Assets</th>
             <th>User Selected Assets</th>
@@ -53,11 +53,73 @@
 </div>
 -->
 
+<div id="Suggested Dividend Assets">
+    <h3>Suggested Dividend Assets</h3>
+    <table class="table table-striped responsive" id="suggested-dividend-assets">
+        <tr>
+            <th>Score</th>
+            <th>Symbol</th>
+            <th>Price</th>
+            <th>Company</th>
+            <th>MarketCap</th>
+            <th>1YrH</th>
+            <th>1YrL</th>
+            <th>10DAvgV</th>
+            <th>30DAvgV</th>
+            <th>EPS</th>
+            <th>DivRate</th>
+            <th>DivYield</th>
+            <th>LastDiv</th>
+            <th>Divfreq</th>
+            <th>PE</th>
+            <th>beta</th>
+            <th>5Yr%Chg</th>
+            <th>1Yr%Chg</th>
+            <th>6M%Chg</th>
+            <th>3M%Chg</th>
+            <th>1M%Chg</th>
+            <th>5D%Chg</th>
+            <th>Exchange</th>
+            <th>Class</th>
+            <th>Updated</th>
+        </tr>
+        @foreach (var m in Model.SuggestedDividendAssets)
+        {
+            <tr>
+                <td>@m.score</td>
+                <td>@m.symbol</td>
+                <td>@Math.Round(@m.price, 2)</td>
+                <td>@m.companyName</td>
+                <td>@m.marketCap</td>
+                <td>@Math.Round(@m.week52High, 2)</td>
+                <td>@Math.Round(@m.week52Low, 2)</td>
+                <td>@m.avg10Volume</td>
+                <td>@m.avg30Volume</td>
+                <td>@Math.Round(@m.ttmEPS, 4)</td>
+                <td>@Math.Round(@m.ttmDividendRate, 4)</td>
+                <td>@Math.Round(@m.dividendYield, 4)</td>
+                <td>@m.exDividendDate</td>
+                <td>@Math.Round(@m.dividendFrequency, 4)</td>
+                <td>@Math.Round(@m.peRatio, 4)</td>
+                <td>@Math.Round(@m.beta, 4)</td>
+                <td>@Math.Round(@m.year5ChangePercent, 4)</td>
+                <td>@Math.Round(@m.year1ChangePercent, 4)</td>
+                <td>@Math.Round(@m.month6ChangePercent, 4)</td>
+                <td>@Math.Round(@m.month3ChangePercent, 4)</td>
+                <td>@Math.Round(@m.month1ChangePercent, 4)</td>
+                <td>@Math.Round(@m.day5ChangePercent, 4)</td>
+                <td>@m.exchange</td>
+                <td>@m.assetClass</td>
+                <td>@m.updated</td>
+            </tr>
+        }
+    </table>
 
+</div>
 
 <div id="Suggested Trade Assets">
     <h3>Suggested Trade Assets</h3>
-    <table class="table" id="suggested-trade-assets">
+    <table class="table table-striped responsive" id="suggested-trade-assets">
         <tr>
             <th>Score</th>
             <th>Symbol</th>
@@ -87,23 +149,23 @@
             <tr>
                 <td>@m.score</td>
                 <td>@m.symbol</td>
-                <td>@m.price</td>
+                <td>@Math.Round(@m.price, 2)</td>
                 <td>@m.companyName</td>
                 <td>@m.marketCap</td>
-                <td>@m.week52High</td>
-                <td>@m.week52Low</td>
+                <td>@Math.Round(@m.week52High, 2)</td>
+                <td>@Math.Round(@m.week52Low, 2)</td>
                 <td>@m.avg30Volume</td>
-                <td>@m.ttmEPS</td>
-                <td>@m.ttmDividendRate</td>
-                <td>@m.dividendYield</td>
-                <td>@m.peRatio</td>
-                <td>@m.beta</td>
-                <td>@m.year5ChangePercent</td>
-                <td>@m.year1ChangePercent</td>
-                <td>@m.month6ChangePercent</td>
-                <td>@m.month3ChangePercent</td>
-                <td>@m.month1ChangePercent</td>
-                <td>@m.day5ChangePercent</td>
+                <td>@Math.Round(@m.ttmEPS, 4)</td>
+                <td>@Math.Round(@m.ttmDividendRate, 4)</td>
+                <td>@Math.Round(@m.dividendYield, 4)</td>
+                <td>@Math.Round(@m.peRatio, 4)</td>
+                <td>@Math.Round(@m.beta, 4)</td>
+                <td>@Math.Round(@m.year5ChangePercent, 4)</td>
+                <td>@Math.Round(@m.year1ChangePercent, 4)</td>
+                <td>@Math.Round(@m.month6ChangePercent, 4)</td>
+                <td>@Math.Round(@m.month3ChangePercent, 4)</td>
+                <td>@Math.Round(@m.month1ChangePercent, 4)</td>
+                <td>@Math.Round(@m.day5ChangePercent, 4)</td>
                 <td>@m.exchange</td>
                 <td>@m.assetClass</td>
                 <td>@m.updated</td>
@@ -112,69 +174,6 @@
     </table>
 </div>
 
-<div id="Suggested Dividend Assets">
-    <h3>Suggested Dividend Assets</h3>
-    <table class="table" id="suggested-dividend-assets">
-        <tr>
-            <th>Score</th>
-            <th>Symbol</th>
-            <th>Price</th>
-            <th>Company</th>
-            <th>MarketCap</th>
-            <th>1YrH</th>
-            <th>1YrL</th>
-            <th>30DAvgV</th>
-            <th>EPS</th>
-            <th>DivRate</th>
-            <th>DivYield</th>
-            <th>nextDiv</th>
-            <th>LastDiv</th>
-            <th>Divfreq</th>
-            <th>PE</th>
-            <th>beta</th>
-            <th>5Yr%Chg</th>
-            <th>1Yr%Chg</th>
-            <th>6M%Chg</th>
-            <th>3M%Chg</th>
-            <th>1M%Chg</th>
-            <th>5D%Chg</th>
-            <th>Exchange</th>
-            <th>Class</th>
-            <th>Updated</th>
-        </tr>
-        @foreach (var m in Model.SuggestedDividendAssets)
-        {
-            <tr>
-                <td>@m.score</td>
-                <td>@m.symbol</td>
-                <td>@m.price</td>
-                <td>@m.companyName</td>
-                <td>@m.marketCap</td>
-                <td>@m.week52High</td>
-                <td>@m.week52Low</td>
-                <td>@m.avg30Volume</td>
-                <td>@m.ttmEPS</td>
-                <td>@m.ttmDividendRate</td>
-                <td>@m.dividendYield</td>
-                <td>@m.nextDividendDate</td>
-                <td>@m.exDividendDate</td>
-                <td>@m.dividendFrequency</td>
-                <td>@m.peRatio</td>
-                <td>@m.beta</td>
-                <td>@m.year5ChangePercent</td>
-                <td>@m.year1ChangePercent</td>
-                <td>@m.month6ChangePercent</td>
-                <td>@m.month3ChangePercent</td>
-                <td>@m.month1ChangePercent</td>
-                <td>@m.day5ChangePercent</td>
-                <td>@m.exchange</td>
-                <td>@m.assetClass</td>
-                <td>@m.updated</td>
-            </tr>
-        }
-    </table>
-
-</div>
 
 
 
