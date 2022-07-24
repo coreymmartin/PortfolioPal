@@ -13,21 +13,22 @@ namespace PortfolioPal.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly IPortfolioRepo repo = new PortfolioRepo();
+        private readonly IPortfolioRepo portRepo;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, IPortfolioRepo portRepo)
         {
+            this.portRepo = portRepo;
             _logger = logger;
         }
 
         public IActionResult Index()
         {
-            var p = new Portfolio();
-            p = repo.GetAccount(p);
-            repo.CheckMarketOpen(p);
-            repo.GetAllPortfolioPositions(p);
-            repo.UpdatePortfolioDiversity(p);
-            var pData = repo.GetDiversityChartValues(p);
+            var p = portRepo.GetAccount();
+            portRepo.CheckMarketOpen(p);
+            portRepo.GetAllPortfolioPositions(p);
+            portRepo.UpdatePortfolioDiversity(p);
+            ViewBag.PieDataPoints = JsonConvert.SerializeObject(portRepo.GetDiversityChartValues(p));
+            ViewBag.HistoryDataPoints = JsonConvert.SerializeObject(portRepo.GetPortfolioHistory("1D", "15Min"));
             return View(p);
         }
 

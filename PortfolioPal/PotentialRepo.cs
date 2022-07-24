@@ -39,26 +39,24 @@ namespace PortfolioPal
         public List<string> AllOptionalAssets {get; set;}
         public List<string> DividendAssets {get; set;}
 
-        public PotentialRepo ()
+        public PotentialRepo (IDbConnection conn)
         {
+            _conn = conn;
             _clientBroker = new HttpClient();
             _clientIEX = new HttpClient();
             _clientBroker.DefaultRequestHeaders.Add("APCA-API-KEY-ID", APCA_API_KEY);       // fix this its messy.
             _clientBroker.DefaultRequestHeaders.Add("APCA-API-SECRET-KEY", APCA_API_SECRET);
 
-            var config = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json").Build();
-            string connString = config.GetConnectionString("portfoliopal");
-            _conn = new MySqlConnection(connString);
-            // do we need to close this connection? maybe so? because then we keep openning new ones?
+            //var config = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json").Build();
+            //string connString = config.GetConnectionString("portfoliopal");
+            //_conn = new MySqlConnection(connString);
         }
     # endregion
 
     # region misc functions
         public double GetDoubleJObj(string obj, string value)
         {
-            double objDouble = 0;
-            var gotDouble = double.TryParse(JObject.Parse(obj).GetValue(value).ToString(), out objDouble);
-            return objDouble;
+            return (double.TryParse(JObject.Parse(obj).GetValue(value).ToString(), out double objDouble)) ? objDouble : 0;
         }
 
         public async Task<string> AwaitClientGetReponse(HttpClient client, string url)
@@ -99,7 +97,7 @@ namespace PortfolioPal
         {
             AllPotentialAssets = new List<Potential>();
             AllPotentialAssetsSymbols = new List<string>();
-            AssetRepo aRepo = new AssetRepo();
+            AssetRepo aRepo = new AssetRepo(_conn);
             var potentials = aRepo.GetAllTradableAssets();
             for (var i = 0; i < potentials.Count(); i++){
                 var pot = new Potential
@@ -119,7 +117,7 @@ namespace PortfolioPal
 
         public void GetUserSelectedAssets()
         {
-            AssetRepo aRepo = new AssetRepo();
+            AssetRepo aRepo = new AssetRepo(_conn);
             UserSelectedAssetsRequired = aRepo.GetUserSelectedRequiredDB();
             UserSelectedAssetsOptional = aRepo.GetUserSelectedOptionalDB();
         }

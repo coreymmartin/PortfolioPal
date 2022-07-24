@@ -3,7 +3,7 @@
 *@
 @{
 }
-@model AssetRepo
+@model IEnumerable<Asset>
 
 <h2>Trade Assets</h2>
 
@@ -18,53 +18,64 @@
 
 
 <div id="active-assets-overview">
-    <h3>Active Assets</h3>
+    <h3>All Traded Assets</h3>
     <section>
         <table class="table table-striped responsive">
             <tr>
-                <th>Number Traded Assets</th>
-                <th>Total Orders</th>
+                <th>Symbol</th>
+                <th>Price</th>
+                <th>Qty</th>
+                <th>Side</th>
+                <th>MarketValue</th>
+                <th>CostBasis</th>
+                <th>PL($)Current</th>
+                <th>PL(%)Current</th>
+                <th>PL($)Today</th>
+                <th>PL(%)Today</th>
+                <th>LastPrice</th>
+                <th>ChangeToday</th>
+                <th>TotalTraded</th>
+                <th>TotalTrades</th>
                 <th>Buys/Sells</th>
-                <th>Total Traded</th>
+                <th>TotalPL(%)</th>
+                <th>TotalPL($)</th>
+                <th>AssetPL(%)</th>
+                <th>Performance</th>
+                <th>PriceBaseline</th>
+                <th>Shortable</th>
+                <th>AssetClass</th>
+                <th>Exchange</th>
             </tr>
-            <tr>
-                <td>@Model.NumAssetsTraded</td>
-                <td>@Model.TotalNumberTrades</td>
-                <td>@Model.TotalNumberBuys / @Model.TotalNumberSells</td>
-                <td>$@Math.Round(@Model.TotalTraded, 2)</td>
-            </tr>
+            @foreach(var a in Model)
+            {
+                <tr>
+                    
+                    <td><a href=/TradeAssets/TradedAsset/@a.symbol>@a.symbol</a></td>
+                    <td>@Math.Round(@a.price, 4)</td>
+                    <td>@Math.Round(@a.qty, 6)</td>
+                    <td>@a.side</td>
+                    <td>@Math.Round(@a.marketValue, 2)</td>
+                    <td>@Math.Round(@a.costBasis, 2)</td>
+                    <td>@Math.Round(@a.plDollarsTotal, 2)</td>
+                    <td>@Math.Round(@a.plPercentTotal, 4)</td>
+                    <td>@Math.Round(@a.plDollarsToday, 2)</td>
+                    <td>@Math.Round(@a.plPercentToday, 4)</td>
+                    <td>@Math.Round(@a.lastPrice, 2)</td>
+                    <td>@Math.Round(@a.changeToday, 2)</td>
+                    <td>@Math.Round(@a.TotalTraded, 2)</td>
+                    <td>@a.NumberTrades</td>
+                    <td>@a.NumberBuys</td>
+                    <td>@a.NumberSells</td>
+                    <td>@Math.Round(@a.TotalPLP, 4)</td>
+                    <td>@Math.Round(@a.TotalPLD, 2)</td>
+                    <td>@Math.Round(@a.assetPLP, 4)</td>
+                    <td>@Math.Round(@a.performance, 4)</td>
+                    <td>@Math.Round(@a.priceBaseline, 2)</td>
+                    <td>@a.shortable</td>
+                    <td>@a.assetClass</td>
+                    <td>@a.exchange</td>
+                </tr>
+            }
         </table>
     </section>
 </div>
-
-<div id="recent-orders">
-    <table class="table table-striped responsive">
-        <tr>
-            <th>symbol</th>
-            <th>side</th>
-            <th>status</th>
-            <th>filledQty</th>
-            <th>filledPrice</th>
-            <th>filledAt</th>
-            <th>orderType</th>
-            <th>assetClass</th>
-            <th>clientOrderId</th>
-        </tr>
-        @foreach(var r in Model.RecentFilledOrders){
-            <tr>
-                <td>@r.symbol</td>
-                <td>@r.side</td>
-                <td>@r.status</td>
-                <td>@r.filledQty</td>
-                <td>@r.filledPrice</td>
-                <td>@r.filledAt</td>
-                <td>@r.orderType</td>
-                <td>@r.assetClass</td>
-                <td>@r.clientOrderId</td>
-            </tr>
-        }
-    </table>
-</div>
-
-
-

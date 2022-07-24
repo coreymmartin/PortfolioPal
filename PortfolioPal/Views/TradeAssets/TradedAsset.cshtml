@@ -1,0 +1,135 @@
+﻿@{
+}
+@model PortfolioPal.ViewModels.TradeAssetVM
+<head>
+       <script>
+        window.onload = function () {
+        var chart = new CanvasJS.Chart("chartContainer-assethistory", {
+            animationEnabled: true,
+            title: {
+                text: "Asset History"
+            },
+            toolTip: {
+                shared: true
+            },
+            data: [{
+                type: "line",
+                name: "Equity",
+                xValueType: "datetime",
+                showInLegend: true,
+                dataPoints: @Html.Raw(ViewBag.AssetEquity)
+            }, {
+                type: "scatter",
+                name: "orders",
+                xValueType: "datetime",
+                showInLegend: true,
+                dataPoints: @Html.Raw(ViewBag.OrderDatas)
+            }]
+        });
+        chart.render();
+        }
+    </script>
+</head>
+
+<h2>@Model.asset.symbol</h2>
+
+<div id="assets-actions">
+<ul>
+    <li><a class="testes" asp-area="" asp-controller="TradeAssets" asp-action="Index">All Trade Assets</a></li>
+    <li><a class="testes" asp-area="" asp-controller="TradeAssets" asp-action="UpdateAssets">Update Trade Asset</a></li>
+    <li><a class="testes" asp-area="" asp-controller="TradeAssets" asp-action="Index">Reset Trade Assets</a></li>
+    <li><a class="testes" asp-area="" asp-controller="TradeAssets" asp-action="Index">Edit Trade Assets</a></li>
+</ul>
+</div>
+
+<div id="chartContainer-assethistory" style="height: 370px; width: 75%;"></div>
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+
+
+<div id="active-assets-overview">
+    <h3>Asset Info</h3>
+    <section>
+        <table class="table table-striped responsive">
+            <tr>
+                <th>Symbol</th>
+                <th>TotalPL(%)</th>
+                <th>TotalPL($)</th>
+                <th>PL($)Today</th>
+                <th>PL($)Current</th>
+                <th>PL(%)Today</th>
+                <th>PL(%)Current</th>
+                <th>TotalTraded($)</th>
+                <th>TotalTrades</th>
+                <th>Buys/Sells</th>
+                <th>Price</th>
+                <th>Side</th>
+                <th>Qty</th>
+                <th>MarketValue</th>
+                <th>CostBasis</th>
+                <th>LastPrice</th>
+                <th>ChangeToday</th>
+                <th>AssetPL(%)</th>
+                <th>Performance</th>
+                <th>PriceBaseline</th>
+                <th>Shortable</th>
+                <th>AssetClass</th>
+                <th>Exchange</th>
+                <th>AssetID</th>
+            </tr>
+            <tr>
+                <td>@Model.asset.symbol</td>
+                <td>@Math.Round(Model.asset.TotalPLP, 4)</td>
+                <td>@Math.Round(Model.asset.TotalPLD, 2)</td>
+                <td>@Math.Round(Model.asset.plDollarsToday, 2)</td>
+                <td>@Math.Round(Model.asset.plDollarsTotal, 2)</td>
+                <td>@Math.Round(Model.asset.plPercentToday, 4)</td>
+                <td>@Math.Round(Model.asset.plPercentTotal, 4)</td>
+                <td>@Math.Round(Model.asset.TotalTraded, 2)</td>
+                <td>@Model.asset.NumberTrades</td>
+                <td>@Model.asset.NumberBuys/@Model.asset.NumberSells</td>
+                <td>@Math.Round(Model.asset.price, 2)</td>
+                <td>@Model.asset.side</td>
+                <td>@Math.Round(Model.asset.qty, 2)</td>
+                <td>@Math.Round(Model.asset.marketValue, 2)</td>
+                <td>@Math.Round(Model.asset.costBasis, 2)</td>
+                <td>@Math.Round(Model.asset.lastPrice, 2)</td>
+                <td>@Math.Round(Model.asset.changeToday, 2)</td>
+                <td>@Math.Round(Model.asset.assetPLP, 4)</td>
+                <td>@Math.Round(Model.asset.performance, 4)</td>
+                <td>@Math.Round(Convert.ToDecimal(Model.asset.priceBaseline), 2)</td>
+                <td>@Model.asset.shortable</td>
+                <td>@Model.asset.assetClass</td>
+                <td>@Model.asset.exchange</td>
+                <td>@Model.asset.assetID</td>
+            </tr>
+        </table>
+    </section>
+    <section>
+        <table class="table">
+            <tr>
+                <th>Symbol</th>
+                <th>FilledQty</th>
+                <th>FilledPrice</th>
+                <th>ClientOrderId</th>
+                <th>FilledAt</th>
+                <th>AssetClass</th>
+                <th>OrderType</th>
+                <th>TimeInForce</th>
+                <th>ExtendedHours</th>                
+            </tr>
+            @foreach (var o in Model.orders){
+                <tr>
+                    <td>@o.symbol</td>
+                    <td>@o.filledQty</td>
+                    <td>@Math.Round(o.filledPrice, 4)</td>
+                    <td>@o.clientOrderId</td>
+                    <td>@o.filledAt</td>
+                    <td>@o.assetClass</td>
+                    <td>@o.orderType</td>
+                    <td>@o.timeInForce</td>
+                    <td>@o.extendedHours</td>                
+                </tr>
+            }
+        </table>
+    </section>
+</div>

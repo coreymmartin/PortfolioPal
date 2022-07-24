@@ -43,18 +43,6 @@ namespace PortfolioPal
         }
 
 
-        //public OrderRepo()
-        //{
-        //    _clientBroker = new HttpClient();
-        //    _clientBroker.DefaultRequestHeaders.Add("APCA-API-KEY-ID", APCA_API_KEY);
-        //    _clientBroker.DefaultRequestHeaders.Add("APCA-API-SECRET-KEY", APCA_API_SECRET);
-        // 
-        //    //var config = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json").Build();
-        //    //string connString = config.GetConnectionString("portfoliopal");
-        //    //_conn = new MySqlConnection(connString);
-        //    // do we need to close this connection? maybe so? because then we keep openning new ones?
-        //}
-
         public void CreateOrderTableDB()
         {
             _conn.Execute("DROP TABLE IF EXISTS `orders`; " +
@@ -155,9 +143,9 @@ namespace PortfolioPal
 
         public void GetAllFilledOrders()
         {
-            PortfolioRepo portRepo = new PortfolioRepo();
-            Portfolio port = portRepo.GetAccount(new Portfolio());
-            List<Order> batchOrders = new List<Order>();
+            PortfolioRepo portRepo = new PortfolioRepo(_conn);
+            var port = portRepo.GetAccount();
+            List<Order> batchOrders;
             CreateOrderTableDB();
             var RequestStartDate = port.createdAt;
             string newRequestStartDate;
@@ -223,10 +211,10 @@ namespace PortfolioPal
             return _conn.Query<Order>($"SELECT * FROM orders ORDER BY orderIndex DESC;");
         }
 
-        public IEnumerable<Order> ReadAssetOrders(string asset)
+        public IEnumerable<Order> ReadAssetOrders(string asset, int limit = 500)
         {
             CheckForTable();
-            return _conn.Query<Order>($"SELECT * FROM orders WHERE symbol = {asset} ORDER BY orderIndex DESC;");
+            return _conn.Query<Order>($"SELECT * FROM orders WHERE symbol = '{asset}' ORDER BY orderIndex DESC LIMIT {limit};");
         }
 
         public void GetNumTradedAssetsDB() {
@@ -254,60 +242,36 @@ namespace PortfolioPal
             TotalNumberSells = Convert.ToDouble(_conn.ExecuteScalar($"SELECT COUNT(*) FROM orders WHERE side = 'sell'"));
         }
 
-
-        public void CalcOrderOverview()
-        {
-            CheckForTable();
-            CalcTotalTraded();
-            CalcTotalNumberTrades();
-            CalcTotalNumberBuys();
-            CalcTotalNumberSells();
-            GetNumTradedAssetsDB();
-            //GetAllTradedAssets();
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
         public void CalcAssetTotalTraded(Asset asset)
         {
-            asset.TotalTraded = Convert.ToDouble(_conn.ExecuteScalar($"SELECT SUM(filledQty * filledPrice) FROM orders WHERE symbol = {asset.symbol} AND side = 'buy'"));
+            asset.TotalTraded = Convert.ToDouble(_conn.ExecuteScalar($"SELECT SUM(filledQty * filledPrice) FROM orders WHERE symbol = '{asset.symbol}' AND side = 'buy'"));
         }
 
         public void CalcAssetNumberTrades(Asset asset)
         {
-            asset.NumberTrades = Convert.ToInt32(_conn.ExecuteScalar($"SELECT COUNT(*) FROM orders WHERE symbol = {asset.symbol}"));
+            asset.NumberTrades = Convert.ToInt32(_conn.ExecuteScalar($"SELECT COUNT(*) FROM orders WHERE symbol = '{asset.symbol}'"));
         }
 
         public void CalcAssetNumberBuys(Asset asset)
         {
-            asset.NumberBuys = Convert.ToInt32(_conn.ExecuteScalar($"SELECT COUNT(*) FROM orders WHERE symbol = {asset.symbol} and side = 'buy'"));
+            asset.NumberBuys = Convert.ToInt32(_conn.ExecuteScalar($"SELECT COUNT(*) FROM orders WHERE symbol = '{asset.symbol}' and side = 'buy'"));
         }
 
         public void CalcAssetNumberSells(Asset asset)
         {
-            asset.NumberSells = Convert.ToInt32(_conn.ExecuteScalar($"SELECT COUNT(*) FROM orders WHERE symbol = {asset.symbol} and side = 'sell'"));
+            asset.NumberSells = Convert.ToInt32(_conn.ExecuteScalar($"SELECT COUNT(*) FROM orders WHERE symbol = '{asset.symbol}' and side = 'sell'"));
         }
 
         public void CalcAssetTotalPLD(Asset asset)
         {
-            var buyAmount = Convert.ToDouble(_conn.ExecuteScalar($"SELECT SUM(filledQty * filledPrice) FROM orders WHERE symbol = {asset.symbol} and side = 'buy'"));
-            var sellAmount = Convert.ToDouble(_conn.ExecuteScalar($"SELECT SUM(filledQty * filledPrice) FROM orders WHERE symbol = {asset.symbol} and side = 'sell'"));
+            var buyAmount = Convert.ToDouble(_conn.ExecuteScalar($"SELECT SUM(filledQty * filledPrice) FROM orders WHERE symbol = '{asset.symbol}' and side = 'buy'"));
+            var sellAmount = Convert.ToDouble(_conn.ExecuteScalar($"SELECT SUM(filledQty * filledPrice) FROM orders WHERE symbol = '{asset.symbol}' and side = 'sell'"));
             asset.TotalPLD = buyAmount - sellAmount;
         }
 
         public void UpdateAssetTotalPLP(Asset asset)
         {
-            asset.TotalPLP = asset.TotalPLD / asset.TotalTraded;
+            asset.TotalPLP = (asset.TotalPLD / asset.TotalTraded) * 100;
         }
 
         public void GetAllTradedAssets()
@@ -317,18 +281,73 @@ namespace PortfolioPal
 
         public List<string> ReadAllTradedAssetsFromOrders()
         {
-            return _conn.Query<string>("SELECT distinct symbols from orders").ToList();
+            return _conn.Query<string>("SELECT distinct symbol from orders").ToList();
+        }
+
+        public List<ChartDataPoint> ExtractOrderData(List<Order> orders)
+        {
+            string _date;
+            double _price;
+            List<ChartDataPoint> orderDataPoints = new List<ChartDataPoint>();
+            orders.Reverse();
+            foreach (var o in orders)
+            {
+                _date = o.filledAt;
+                _price = (double.TryParse(o.filledPrice.ToString(), out double d)) ? d : 0;
+                if (_price != 0){
+                    orderDataPoints.Add(new ChartDataPoint(_date.ToString(), _price));
+                }
+            }
+            return orderDataPoints;
+        }
+
+        public List<ChartDataPoint> ChartDataFiller(List<ChartDataPoint> sampleData, List<ChartDataPoint> modelData)
+        {
+            int sampleCountMax = sampleData.Count();
+            int sampleCount = 0;
+            List<ChartDataPoint> filledData = new List<ChartDataPoint>();
+            foreach(var m in modelData)
+            {
+                if (Convert.ToDateTime(m.Label) < Convert.ToDateTime(sampleData[sampleCount].Label))
+                {
+                    filledData.Add(new ChartDataPoint(m.Label, null));
+                }
+                else if (Convert.ToDateTime(m.Label) >= Convert.ToDateTime(sampleData[sampleCount].Label))
+                {
+                    filledData.Add(new ChartDataPoint(sampleData[sampleCount].Label, Convert.ToDouble(sampleData[sampleCount].Y)));
+                    sampleCount++;
+                }
+                if (sampleCount >= sampleCountMax)
+                {
+                    break;
+                }
+            }
+            return filledData;
         }
 
 
-        public void UpdateAssetStats(Asset asset)
+        public void CalcOrderOverview()
         {
+            CheckForTable();
+            CalcTotalTraded();
+            CalcTotalNumberTrades();
+            CalcTotalNumberBuys();
+            CalcTotalNumberSells();
+            GetNumTradedAssetsDB();
+        }
+
+
+        public Asset GetUpdatedAssetStats(string symbol)
+        {
+            Asset asset = new Asset();
+            asset.symbol = symbol;
             CalcAssetTotalTraded(asset);
             CalcAssetNumberTrades(asset);
             CalcAssetNumberBuys(asset);
             CalcAssetNumberSells(asset);
             CalcAssetTotalPLD(asset);
             UpdateAssetTotalPLP(asset);
+            return asset;
         }
 
         public void UpdateAllAssetStats()
@@ -344,12 +363,22 @@ namespace PortfolioPal
             GetNewFilledOrders();
             GetAllTradedAssets();
             foreach (var a in AllTradedAssets){
-                UpdateAssetStats(a);
+                GetUpdatedAssetStats(a.symbol);
             }
             UpdateAllAssetStats();
-            // now what?!
-
+            // now what?! do we even use this?
         }
-
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
     }
 }

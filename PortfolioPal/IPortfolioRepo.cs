@@ -7,11 +7,11 @@ namespace PortfolioPal
     public interface IPortfolioRepo
     {
 
-        public Portfolio GetAccount(Portfolio p);
+        public Portfolio GetAccount();
         public void GetAllPortfolioPositions(Portfolio p);
         public void UpdatePortfolioDiversity(Portfolio p);
-        public PortfolioHistory GetPortfolioHistory(string period = "1D", string timeframe = "15Min");
+        public List<ChartDataPoint> GetPortfolioHistory(string period = "1D", string timeframe = "15Min");
         public void CheckMarketOpen(Portfolio p);
-        public List<PieDataPoint> GetDiversityChartValues(Portfolio p);
+        public List<PieChartDataPoint> GetDiversityChartValues(Portfolio p);
     }
 }

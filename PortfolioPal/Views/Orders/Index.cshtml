@@ -6,7 +6,7 @@
 
 <ul>
     <li><a class="testes" asp-area="" asp-controller="Orders" asp-action="Index">Overview</a></li>
-    <li><a class="testes" asp-area="" asp-controller="Orders" asp-action="DisplayAllOrders">Display All Orders</a></li>
+    <li><a class="testes" asp-area="" asp-controller="Orders" asp-action="AllOrders">Display All Orders</a></li>
     <li><a class="testes" asp-area="" asp-controller="Orders" asp-action="UpdateOrders">Update Orders</a></li>
     <li><a class="testes" asp-area="" asp-controller="Orders" asp-action="GetAllOrders">Initialize Orders</a></li>
 </ul>
@@ -48,7 +48,7 @@
         </tr>
         @foreach(var r in Model.RecentFilledOrders){
             <tr>
-                <td>@r.symbol</td>
+                <td><a href=/Orders/AssetOrders/@r.symbol>@r.symbol</a></td>
                 <td>@r.side</td>
                 <td>@r.status</td>
                 <td>@r.filledQty</td>

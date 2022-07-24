@@ -22,7 +22,7 @@
         public double lastPrice { get; set; }
         public double changeToday { get; set; }
     
-        public double? priceBaseline {get; set;}
+        public double priceBaseline {get; set;}
         public double assetPLP { get; set; }
 
 

@@ -19,7 +19,7 @@
         </tr>
         @foreach (var o in Model){
             <tr>
-                <td>@o.symbol</td>
+                <td><a href=/Orders/AssetOrders/@o.symbol>@o.symbol</a></td>
                 <td>@o.side</td>
                 <td>@o.filledQty</td>
                 <td>@o.filledPrice</td>

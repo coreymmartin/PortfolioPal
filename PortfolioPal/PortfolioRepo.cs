@@ -25,20 +25,17 @@ namespace PortfolioPal
         private List<string> okTimeframe = new List<string>() { "15Min", "1H", "1D", "1W" };
 
 
-        public PortfolioRepo ()
+        public PortfolioRepo (IDbConnection conn)
         {
+            _conn = conn;
             _clientBroker = new HttpClient();
             _clientBroker.DefaultRequestHeaders.Add("APCA-API-KEY-ID", APCA_API_KEY);
-            _clientBroker.DefaultRequestHeaders.Add("APCA-API-SECRET-KEY", APCA_API_SECRET);
-     
-            //var config = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json").Build();
-            //string connString = config.GetConnectionString("portfoliopal");
-            //_conn = new MySqlConnection(connString);
-            // do we need to close this connection? maybe so? because then we keep openning new ones?
+            _clientBroker.DefaultRequestHeaders.Add("APCA-API-SECRET-KEY", APCA_API_SECRET);    
         }
 
-        public Portfolio GetAccount(Portfolio p)
+        public Portfolio GetAccount()
         {
+            Portfolio p = new Portfolio();
             var accountURL = $"{APCA_API_URL}/v2/account";
             var accountResponse = _clientBroker.GetStringAsync(accountURL).Result;
             var accountInfo = JObject.Parse(accountResponse).ToString();
@@ -61,6 +58,8 @@ namespace PortfolioPal
             return p;
         }
         
+        
+
         public void GetAllPortfolioPositions(Portfolio p)
         {
             var positionsURL = $"{APCA_API_URL}/v2/positions";
@@ -91,6 +90,8 @@ namespace PortfolioPal
                     p.cryptoPositions.Add(asset);
             }
         }
+
+
         
         public void UpdatePortfolioDiversity(Portfolio p)
         {
@@ -117,32 +118,43 @@ namespace PortfolioPal
             p.cryptoHoldingActual   = cryptoHolding;
         }
 
-        public List<PieDataPoint> GetDiversityChartValues(Portfolio p){
-            List<PieDataPoint> pieData = new List<PieDataPoint>();
-            pieData.Add(new PieDataPoint("Stocks", p.stockHoldingActual));
-            pieData.Add(new PieDataPoint("Dividends",10));
-            pieData.Add(new PieDataPoint("Crypto", p.cryptoHoldingActual));
+        public List<PieChartDataPoint> GetDiversityChartValues(Portfolio p){
+            List<PieChartDataPoint> pieData = new List<PieChartDataPoint>();
+            pieData.Add(new PieChartDataPoint("Stocks", p.stockHoldingActual));
+            pieData.Add(new PieChartDataPoint("Dividends",10));
+            pieData.Add(new PieChartDataPoint("Crypto", p.cryptoHoldingActual));
             return pieData;
         }
 
-        public PortfolioHistory GetPortfolioHistory(string period = "1D", string timeframe = "15Min")
+        public List<ChartDataPoint> GetPortfolioHistory(string period = "1D", string timeframe = "15Min")
         {
+            List<ChartDataPoint> portHistoryData = new List<ChartDataPoint>();
             if (!okPeriod.Contains(period))
                 period = "1D";
             if (!okTimeframe.Contains(timeframe))
                 timeframe = "15Min";
-            var hist = new PortfolioHistory();
             var historyURL = $"{APCA_API_URL}/v2/account/portfolio/history?period={period}&timeframe={timeframe}";
             var historyResponse = _clientBroker.GetStringAsync(historyURL).Result;
-            
-            ///////hist.Timestamp = JArray.Parse(JObject.Parse(historyResponse).GetValue("timestamp").ToString()).ToArray();
-            ///////hist.Equity = JArray.Parse(JObject.Parse(historyResponse).GetValue("equity").ToString()).ToArray();
-            ///////hist.PL = JArray.Parse(JObject.Parse(historyResponse).GetValue("profit_loss").ToString()).ToArray();
-            ///////hist.PLP = JArray.Parse(JObject.Parse(historyResponse).GetValue("profit_loss_pct").ToString()).ToArray();
-            ///////hist.BaseValue = JObject.Parse(historyResponse).GetValue("base_value").ToString();
-            ///////hist.Timeframe = JObject.Parse(historyResponse).GetValue("timeframe").ToString();
-            // so you have all this data but youre not sure what to do with it yet. but you have it!
-            return hist;
+
+            var historyTimestamp = JObject.Parse(historyResponse.ToString()).GetValue("timestamp").ToList();
+            var historyEquity = JObject.Parse(historyResponse.ToString()).GetValue("equity").ToList();
+            var maxEntries = Math.Max(historyTimestamp.Count(), historyEquity.Count());
+            double equity;
+            DateTime timestamp;
+            double tempEquity = 0;
+            for (var i = 0; i < maxEntries; i++){
+                if (historyTimestamp[i] != null && historyEquity[i] != null){
+                    DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+                    timestamp = dateTime.AddSeconds(Convert.ToDouble(historyTimestamp[i])).ToLocalTime();
+
+                    equity = (Double.TryParse(historyEquity[i].ToString(), out double e)) ? e : tempEquity;
+                    if (equity > 0){
+                        portHistoryData.Add(new ChartDataPoint(timestamp.ToString(), equity));
+                        tempEquity = e;
+                    }
+                }
+            }
+            return portHistoryData;
         }
 
         public void CheckMarketOpen(Portfolio p)
@@ -150,6 +162,12 @@ namespace PortfolioPal
             new Clock();
             p.marketOpen = Clock.marketOpen;
         }
+
+        public void UpdatePortfolioTradeAssetsDB(){
+
+        }
+
+
 
     }
 }

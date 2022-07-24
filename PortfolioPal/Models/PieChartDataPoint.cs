@@ -4,9 +4,9 @@ using System.Runtime.Serialization;
 namespace PortfolioPal.Models
 {
     [DataContract]
-    public class PieDataPoint
+    public class PieChartDataPoint
     {
-        public PieDataPoint(string label, double y)
+        public PieChartDataPoint(string label, double y)
         {
             this.Label = label;
             this.Y = y;

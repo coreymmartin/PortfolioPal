@@ -5,6 +5,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Views\Config\**" />
+    <Compile Remove="Views\Portfolio\**" />
+    <Content Remove="Views\Config\**" />
+    <Content Remove="Views\Portfolio\**" />
+    <EmbeddedResource Remove="Views\Config\**" />
+    <EmbeddedResource Remove="Views\Portfolio\**" />
+    <None Remove="Views\Config\**" />
+    <None Remove="Views\Portfolio\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="DapperExtensions.NetCore" Version="2.0.7" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.5" />
@@ -14,8 +25,6 @@
 
   <ItemGroup>
     <Folder Include="TradeData\UserSelectedAssets\" />
-    <Folder Include="Views\Config\" />
-    <Folder Include="Views\Portfolio\" />
   </ItemGroup>
 
 </Project>

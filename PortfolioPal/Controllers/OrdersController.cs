@@ -27,13 +27,13 @@ namespace PortfolioPal.Controllers
             return View(repo);
         }
 
-        public IActionResult DisplayAssetOrders(Asset asset)
+        public IActionResult AssetOrders(string symbol)
         {
-            var assetOrders = repo.ReadAssetOrders(asset.symbol);
+            var assetOrders = repo.ReadAssetOrders(symbol, 500);
             return View(assetOrders);
         }
 
-        public IActionResult DisplayAllOrders()
+        public IActionResult AllOrders()
         {
             var allOrds = repo.ReadAllOrdersDB();
             return View(allOrds);
@@ -48,7 +48,7 @@ namespace PortfolioPal.Controllers
         public IActionResult UpdateOrders()
         {
             repo.GetNewFilledOrders();
-            return RedirectToAction("DisplayAllOrders");
+            return RedirectToAction("AllOrders");
         }
     }
 }

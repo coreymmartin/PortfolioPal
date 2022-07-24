@@ -3,18 +3,19 @@
     
 }
 <!DOCTYPE HTML>
+<html>
 <head>
     <script>
         window.onload = function () {
-        var chart = new CanvasJS.Chart("chartContainer-assetdiversity", {
+        var chart = new CanvasJS.Chart("chartContainer", {
             theme: "light2", // "light1", "light2", "dark1", "dark2"
             exportEnabled: false,
             animationEnabled: true,
             title: {
-                text: "Asset Diversity"
+                text: "Asset Class Diversity"
             },
             subtitles: [{
-                text: ""
+                text: "oh dear"
             }],
             data: [{
                 type: "pie",
@@ -27,22 +28,7 @@
             }]
         });
         chart.render();
-        var chart = new CanvasJS.Chart("chartContainer-history", {
-            animationEnabled: true,
-            title: {
-                text: "Portfolio History"
-            },
-            toolTip: {
-                shared: true
-            },
-            data: [{
-                type: "line",
-                name: "Equity",
-                showInLegend: true,
-                dataPoints: @Html.Raw(ViewBag.HistoryDataPoints)
-            }]
-        });
-        chart.render();
+        
         }
     </script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
@@ -57,13 +43,7 @@
             <div class="row2-mine">
                 <p>Market Open: @Model.marketOpen</p>
                 <p>Today's PL: ($@Math.Round(@Model.todaysPLD, 2)/@Math.Round(@Model.todaysPLP, 2)%)</p>
-            </div>
-            <div class="row2-mine">
-                <div id="chartContainer-assetdiversity" style="height: 200px; width: 90%;"></div>
-                <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>      
-            </div>
-            <h4>Portfolio Summary</h4>
-            <div class="row2-mine">
+                <h4>Portfolio Summary</h4>
                 <div class="table table-striped responsive px-3">
                     <table class="table-tiny">
                         <tr>
@@ -137,12 +117,13 @@
                 </div>
 
             </div>
+            <div class="row2-mine">
+                <p>this is where you will put the pie chart </p>
+                <div id="chartContainer" style="height: 370px; width: 100%;"></div>
+                <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>      
+            </div>
         </div>
         <div class = "column-mine">
-            <div class="row2-mine">
-                <div id="chartContainer-history" style="height: 250px; width: 90%;"></div>
-                <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
-            </div>
             <div class="row2-mine">
                 <h4>Portfolio Positions</h4>
                 <div class="table">
@@ -178,6 +159,9 @@
                         }
                     </table>
                 </div>
+            </div>
+            <div class="yeeeesh">
+                <p>this is where you will put port history</p>
             </div>
         </div>
     </div>

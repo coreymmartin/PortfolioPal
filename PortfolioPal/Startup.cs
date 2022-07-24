@@ -36,6 +36,8 @@ namespace PortfolioPal
 
             services.AddTransient<IPotentialRepo, PotentialRepo>();
             services.AddTransient<IOrderRepo, OrderRepo>();
+            services.AddTransient<IAssetRepo, AssetRepo>();
+            services.AddTransient<IPortfolioRepo, PortfolioRepo>();
             services.AddControllersWithViews();
         }
 
@@ -63,7 +65,7 @@ namespace PortfolioPal
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=Home}/{action=Index}/{symbol?}");
             });
         }
     }

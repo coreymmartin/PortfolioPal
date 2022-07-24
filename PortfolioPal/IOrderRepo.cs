@@ -11,7 +11,7 @@ namespace PortfolioPal
         public void GetNewFilledOrders();
         public void GetLatestOrdersBroker(int numRecents = 25);
         public IEnumerable<Order> ReadAllOrdersDB();
-        public IEnumerable<Order> ReadAssetOrders(string asset);
+        public IEnumerable<Order> ReadAssetOrders(string asset, int limit);
         
         public void AddOrdersToDB(List<Order> orders);
        
@@ -21,7 +21,10 @@ namespace PortfolioPal
        public List<string> ReadAllTradedAssetsFromOrders();
 
         public void UpdateAllOrders();
+        public Asset GetUpdatedAssetStats(string symbol);
+        public List<ChartDataPoint> ExtractOrderData(List<Order> orders);
 
+        public List<ChartDataPoint> ChartDataFiller(List<ChartDataPoint> sampleData, List<ChartDataPoint> modelData);
 
         //public void RemoveAllOrdersDB();
 
