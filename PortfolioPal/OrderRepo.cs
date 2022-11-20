@@ -127,7 +127,7 @@ namespace PortfolioPal
                         filledAt = JObject.Parse(ordersInfo[i].ToString()).GetValue("filled_at").ToString(),
                         symbol = JObject.Parse(ordersInfo[i].ToString()).GetValue("symbol").ToString(),
                         side = JObject.Parse(ordersInfo[i].ToString()).GetValue("side").ToString(),
-                        assetID = JObject.Parse(ordersInfo[i].ToString()).GetValue("assetID").ToString(),
+                        assetID = JObject.Parse(ordersInfo[i].ToString()).GetValue("asset_id").ToString(),
                         assetClass = JObject.Parse(ordersInfo[i].ToString()).GetValue("asset_class").ToString(),
                         filledQty = Convert.ToDouble(JObject.Parse(ordersInfo[i].ToString()).GetValue("filled_qty")),
                         qty = Convert.ToDouble(JObject.Parse(ordersInfo[i].ToString()).GetValue("qty")),
@@ -147,8 +147,8 @@ namespace PortfolioPal
         public void AddOrdersToDB(List<Order> orders)
         {
             foreach (var o in orders) {
-                _conn.Execute("INSERT INTO orders (orderID, clientOrderId, orderStatus, filledAt, symbol, side, assetID, assetClass, filledQty, qty, orderType, filledPrice, " +
-                    "timeInForce, extendedHours) VALUES (@orderID, @clientOrderId, @status, @filledAt, @symbol, @side, @assetID, @assetClass, @filledQty, @qty, @orderType, " +
+                _conn.Execute("INSERT INTO orders (orderID, clientOrderId, orderStatus, filledAt, symbol, side, asset_id, assetClass, filledQty, qty, orderType, filledPrice, " +
+                    "timeInForce, extendedHours) VALUES (@orderID, @clientOrderId, @status, @filledAt, @symbol, @side, @asset_id, @assetClass, @filledQty, @qty, @orderType, " +
                     "@filledPrice, @timeInForce, @extendedHours) ON DUPLICATE KEY UPDATE orderID = orderID;",
                 new
                 {
@@ -283,22 +283,22 @@ namespace PortfolioPal
 
         public void CalcAssetTotalTraded(Asset asset)
         {
-            asset.TotalTraded = Convert.ToDouble(_conn.ExecuteScalar($"SELECT SUM(filledQty * filledPrice) FROM orders WHERE symbol = '{asset.symbol}' AND side = 'buy'"));
+            asset.amount_traded_total = Convert.ToDouble(_conn.ExecuteScalar($"SELECT SUM(filledQty * filledPrice) FROM orders WHERE symbol = '{asset.symbol}' AND side = 'buy'"));
         }
 
         public void CalcAssetNumberTrades(Asset asset)
         {
-            asset.NumberTrades = Convert.ToInt32(_conn.ExecuteScalar($"SELECT COUNT(*) FROM orders WHERE symbol = '{asset.symbol}'"));
+            asset.num_trades_total = Convert.ToInt32(_conn.ExecuteScalar($"SELECT COUNT(*) FROM orders WHERE symbol = '{asset.symbol}'"));
         }
 
         public void CalcAssetNumberBuys(Asset asset)
         {
-            asset.NumberBuys = Convert.ToInt32(_conn.ExecuteScalar($"SELECT COUNT(*) FROM orders WHERE symbol = '{asset.symbol}' and side = 'buy'"));
+            asset.num_buys_total = Convert.ToInt32(_conn.ExecuteScalar($"SELECT COUNT(*) FROM orders WHERE symbol = '{asset.symbol}' and side = 'buy'"));
         }
 
         public void CalcAssetNumberSells(Asset asset)
         {
-            asset.NumberSells = Convert.ToInt32(_conn.ExecuteScalar($"SELECT COUNT(*) FROM orders WHERE symbol = '{asset.symbol}' and side = 'sell'"));
+            asset.num_sells_total = Convert.ToInt32(_conn.ExecuteScalar($"SELECT COUNT(*) FROM orders WHERE symbol = '{asset.symbol}' and side = 'sell'"));
         }
 
         public void CalcAssetTotalPLD(Asset asset)
@@ -310,7 +310,7 @@ namespace PortfolioPal
 
         public void UpdateAssetTotalPLP(Asset asset)
         {
-            asset.TotalPLP = (asset.TotalPLD / asset.TotalTraded) * 100;
+            asset.TotalPLP = (asset.TotalPLD / asset.amount_traded_total) * 100;
         }
 
         public void GetAllTradedAssets()

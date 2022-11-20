@@ -72,7 +72,7 @@
                 <th>LastPrice</th>
                 <th>ChangeToday</th>
                 <th>AssetPL(%)</th>
-                <th>Performance</th>
+                <th>port_perf_per_total</th>
                 <th>PriceBaseline</th>
                 <th>Shortable</th>
                 <th>AssetClass</th>
@@ -83,27 +83,27 @@
                 <td>@Model.asset.symbol</td>
                 <td>@Math.Round(Model.asset.TotalPLP, 4)</td>
                 <td>@Math.Round(Model.asset.TotalPLD, 2)</td>
-                <td>@Math.Round(Model.asset.plDollarsToday, 2)</td>
-                <td>@Math.Round(Model.asset.plDollarsTotal, 2)</td>
-                <td>@Math.Round(Model.asset.plPercentToday, 4)</td>
-                <td>@Math.Round(Model.asset.plPercentTotal, 4)</td>
-                <td>@Math.Round(Model.asset.TotalTraded, 2)</td>
-                <td>@Model.asset.NumberTrades</td>
-                <td>@Model.asset.NumberBuys/@Model.asset.NumberSells</td>
-                <td>@Math.Round(Model.asset.price, 2)</td>
+                <td>@Math.Round(Model.asset.pl_dollars_today, 2)</td>
+                <td>@Math.Round(Model.asset.pl_dollars_total, 2)</td>
+                <td>@Math.Round(Model.asset.port_pl_current, 4)</td>
+                <td>@Math.Round(Model.asset.port_pl_total, 4)</td>
+                <td>@Math.Round(Model.asset.amount_traded_total, 2)</td>
+                <td>@Model.asset.num_trades_total</td>
+                <td>@Model.asset.num_buys_total/@Model.asset.num_sells_total</td>
+                <td>@Math.Round(Model.asset.current_price, 2)</td>
                 <td>@Model.asset.side</td>
                 <td>@Math.Round(Model.asset.qty, 2)</td>
-                <td>@Math.Round(Model.asset.marketValue, 2)</td>
-                <td>@Math.Round(Model.asset.costBasis, 2)</td>
+                <td>@Math.Round(Model.asset.market_value, 2)</td>
+                <td>@Math.Round(Model.asset.avg_entry_price, 2)</td>
                 <td>@Math.Round(Model.asset.lastPrice, 2)</td>
                 <td>@Math.Round(Model.asset.changeToday, 2)</td>
-                <td>@Math.Round(Model.asset.assetPLP, 4)</td>
-                <td>@Math.Round(Model.asset.performance, 4)</td>
-                <td>@Math.Round(Convert.ToDecimal(Model.asset.priceBaseline), 2)</td>
+                <td>@Math.Round(Model.asset.asset_pl_total, 4)</td>
+                <td>@Math.Round(Model.asset.port_perf_per_total, 4)</td>
+                <td>@Math.Round(Convert.ToDecimal(Model.asset.start_price_total), 2)</td>
                 <td>@Model.asset.shortable</td>
-                <td>@Model.asset.assetClass</td>
+                <td>@Model.asset.asset_class</td>
                 <td>@Model.asset.exchange</td>
-                <td>@Model.asset.assetID</td>
+                <td>@Model.asset.asset_id</td>
             </tr>
         </table>
     </section>

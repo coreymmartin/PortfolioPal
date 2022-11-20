@@ -174,16 +174,16 @@
                             <tr>
                                 
                                 <td><a href=/TradeAssets/TradedAsset/@pos.symbol>@pos.symbol</a></td>
-                                <td>$@pos.price</td>
-                                <td>@Math.Round(@pos.plPercentTotal, 4)</td>
-                                <td>$@Math.Round(@pos.plDollarsTotal, 2)</td>
+                                <td>$@pos.current_price</td>
+                                <td>@Math.Round(@pos.port_pl_total, 4)</td>
+                                <td>$@Math.Round(@pos.pl_dollars_total, 2)</td>
                                 <td>@Math.Round(@pos.qty, 2)</td>
                                 <td>@pos.side</td>
-                                <td>$@Math.Round(@pos.marketValue, 2)</td>
-                                <td>$@Math.Round(@pos.costBasis, 2)</td>
+                                <td>$@Math.Round(@pos.market_value, 2)</td>
+                                <td>$@Math.Round(@pos.avg_entry_price, 2)</td>
                                 <td>$@Math.Round(@pos.lastPrice, 2)</td>
                                 <td>$@Math.Round(@pos.changeToday, 2)</td>
-                                <td>@pos.assetClass</td>
+                                <td>@pos.asset_class</td>
                             </tr>
                         }
                     </table>

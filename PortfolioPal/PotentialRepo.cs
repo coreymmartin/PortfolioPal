@@ -99,9 +99,9 @@ namespace PortfolioPal
                 var pot = new Potential
                 {
                     symbol = potentials[i].symbol,
-                    assetID = potentials[i].assetID,
+                    assetID = potentials[i].asset_id,
                     exchange = potentials[i].exchange,
-                    assetClass = potentials[i].assetClass,
+                    assetClass = potentials[i].asset_class,
                     shortable = potentials[i].shortable
                 };
                 if (!AllPotentialAssets.Contains(pot))
@@ -213,12 +213,12 @@ namespace PortfolioPal
         public void CreatePotentialViews()
         {
             // time to create views - split these into separate functions later please.
-            // filtered assets (all assets from NASDAQ exchange and US_EQUITY assetClass)
+            // filtered assets (all assets from NASDAQ exchange and US_EQUITY asset_class)
             _conn.Execute("CREATE OR REPLACE VIEW `allfilteredpotentials` AS SELECT potentials.* FROM potentials " +
-            "WHERE potentials.exchange = 'NASDAQ' OR potentials.exchange = 'NYSE' AND potentials.assetClass = 'us_equity';");
+            "WHERE potentials.exchange = 'NASDAQ' OR potentials.exchange = 'NYSE' AND potentials.asset_class = 'us_equity';");
             // updated assets (all assets from filtered, which are updated)
             _conn.Execute("CREATE OR REPLACE VIEW `updatedpotentials` AS SELECT allfilteredpotentials.* FROM allfilteredpotentials " +
-            "WHERE allfilteredpotentials.price > 0 AND DATE(allfilteredpotentials.updated) > 0 ORDER BY updated DESC;");
+            "WHERE allfilteredpotentials.current_price > 0 AND DATE(allfilteredpotentials.updated) > 0 ORDER BY updated DESC;");
             // expired assets (all assets from filtered, which are updated but past expiration)
             _conn.Execute("CREATE OR REPLACE VIEW `expiredpotentials` AS SELECT updatedpotentials.* FROM updatedpotentials " + 
             "WHERE DATE(updatedpotentials.updated) > 0 AND DATE(updatedpotentials.updated) <= CURDATE() -  INTERVAL 30 DAY;");
@@ -236,7 +236,7 @@ namespace PortfolioPal
             "LIMIT 75;");
             // suggested assets - top scoring boys.
             _conn.Execute("CREATE OR REPLACE VIEW `allsuggestedassets` AS SELECT allfilteredpotentials.* FROM allfilteredpotentials " +
-            "LEFT JOIN expiredpotentials ON allfilteredpotentials.assetID = expiredpotentials.assetID " +
+            "LEFT JOIN expiredpotentials ON allfilteredpotentials.asset_id = expiredpotentials.asset_id " +
             "WHERE allfilteredpotentials.SCORE > 0 ORDER BY allfilteredpotentials.SCORE DESC LIMIT 100;");
             // suggested assets (dividends - filtered and updated dividend assets with highest scores)
             // do dividend first then we can dump the rest to the suggested trade you lazy boy :)
@@ -244,8 +244,8 @@ namespace PortfolioPal
             "WHERE dividendYield > 0 ORDER BY allsuggestedassets.SCORE DESC LIMIT 10;");
             // suggested assets (trade - filtered and updated trade assets with highest scores (ignores scores from dividends))
             _conn.Execute("CREATE OR REPLACE VIEW `suggestedtradeassets` AS SELECT allsuggestedassets.* FROM allsuggestedassets " +
-            "LEFT JOIN suggesteddividendassets ON allsuggestedassets.assetID = suggesteddividendassets.assetID " +
-            "WHERE suggesteddividendassets.assetID IS NULL;");
+            "LEFT JOIN suggesteddividendassets ON allsuggestedassets.asset_id = suggesteddividendassets.asset_id " +
+            "WHERE suggesteddividendassets.asset_id IS NULL;");
         }
 
         public IEnumerable<Potential> QueryView(string view)
@@ -337,7 +337,7 @@ namespace PortfolioPal
         
         public Potential GetPotentialDB(Potential potential)
         {
-            return _conn.QuerySingle<Potential>("SELECT * FROM POTENTIALS WHERE assetID = @potential.assetID", 
+            return _conn.QuerySingle<Potential>("SELECT * FROM POTENTIALS WHERE asset_id = @potential.asset_id", 
                 new {assetID = potential.assetID});
         }
 
@@ -348,11 +348,11 @@ namespace PortfolioPal
                 "EXDIVIDENDDATE, DIVIDENDFREQUENCY, PERATIO, BETA, MAXCHANGEPERCENT, YEAR5CHANGEPERCENT, YEAR2CHANGEPERCENT, YEAR1CHANGEPERCENT, " +
                 "YTDCHANGEPERCENT, MONTH6CHANGEPERCENT, MONTH3CHANGEPERCENT, MONTH1CHANGEPERCENT, DAY30CHANGEPERCENT, DAY5CHANGEPERCENT, SHORTABLE, " +
                 "EXCHANGE, ASSETCLASS) VALUES " +
-                "(@assetID, @score, @symbol, @price, @companyName, @marketCap, @week52High, @week52Low, @week52Change, @avg10Volume, @avg30Volume, " +
+                "(@asset_id, @score, @symbol, @current_price, @companyName, @marketCap, @week52High, @week52Low, @week52Change, @avg10Volume, @avg30Volume, " +
                 "@day200MovingAvg, @day50MovingAvg, @employees, @ttmEPS, @ttmDividendRate, @dividendYield, @nextDividendDate, @exDividendDate, " +
                 "@dividendFrequency, @peRatio, @beta, @maxChangePercent, @year5ChangePercent, @year2ChangePercent,@year1ChangePercent, @ytdChangePercent, " +
-                "@month6ChangePercent, @month3ChangePercent, @month1ChangePercent, @day30ChangePercent, @day5ChangePercent, @shortable, @exchange, @assetClass) " +
-                "ON DUPLICATE KEY UPDATE assetID = assetID;",
+                "@month6ChangePercent, @month3ChangePercent, @month1ChangePercent, @day30ChangePercent, @day5ChangePercent, @shortable, @exchange, @asset_class) " +
+                "ON DUPLICATE KEY UPDATE asset_id = asset_id;",
             new 
             {
                 assetID = potential.assetID, score = potential.score, symbol = potential.symbol, price = potential.price,
@@ -375,7 +375,7 @@ namespace PortfolioPal
             if (updateStamp) {
                 timestamp = ", UPDATED = @updated ";
             }
-            _conn.Execute("UPDATE POTENTIALS SET SYMBOL = @symbol, SCORE = @score, PRICE = @price, COMPANYNAME = @companyName, MARKETCAP = @marketCap, " + 
+            _conn.Execute("UPDATE POTENTIALS SET SYMBOL = @symbol, SCORE = @score, PRICE = @current_price, COMPANYNAME = @companyName, MARKETCAP = @marketCap, " + 
             "WEEK52HIGH = @week52High, WEEK52LOW = @week52Low, WEEK52CHANGE = @week52Change, AVG10VOLUME = @avg10Volume, AVG30VOLUME = @avg30Volume, " + 
             "DAY200MOVINGAVG = @day200MovingAvg, DAY50MOVINGAVG = @day50MovingAvg, EMPLOYEES = @employees, TTMEPS = @ttmEPS, " + 
             "TTMDIVIDENDRATE = @ttmDividendRate, DIVIDENDYIELD = @dividendYield, NEXTDIVIDENDDATE = @nextDividendDate, EXDIVIDENDDATE = @exDividendDate, " + 
@@ -383,7 +383,7 @@ namespace PortfolioPal
             "YEAR5CHANGEPERCENT = @year5ChangePercent, YEAR2CHANGEPERCENT = @year2ChangePercent, YEAR1CHANGEPERCENT = @year1ChangePercent, " + 
             "YTDCHANGEPERCENT = @ytdChangePercent, MONTH6CHANGEPERCENT = @month6ChangePercent, MONTH3CHANGEPERCENT = @month3ChangePercent, " + 
             "MONTH1CHANGEPERCENT = @month1ChangePercent, DAY30CHANGEPERCENT = @day30ChangePercent, DAY5CHANGEPERCENT = @day5ChangePercent, " + 
-            $"SHORTABLE = @shortable, EXCHANGE = @exchange, ASSETCLASS = @assetClass{timestamp}WHERE ASSETID = @assetID", 
+            $"SHORTABLE = @shortable, EXCHANGE = @exchange, ASSETCLASS = @asset_class{timestamp}WHERE ASSETID = @asset_id", 
                 new 
                 { 
                     symbol = potential.symbol, score = potential.score, price = potential.price, companyName = potential.companyName, 
@@ -412,10 +412,10 @@ namespace PortfolioPal
         {
             _conn.Execute("DROP TABLE IF EXISTS `potentials`; " +
             "CREATE TABLE `potentials` (" +
-                "`assetID` VARCHAR(100) PRIMARY KEY," +
+                "`asset_id` VARCHAR(100) PRIMARY KEY," +
                 "`score`	 INT," +
                 "`symbol` VARCHAR(100)," +
-                "`price` FLOAT(5)," +
+                "`current_price` FLOAT(5)," +
                 "`companyName` VARCHAR(100)," +
                 "`marketCap` FLOAT(10)," +
                 "`week52High` FLOAT(5)," +
@@ -446,14 +446,14 @@ namespace PortfolioPal
                 "`day5ChangePercent` FLOAT(10)," +
                 "`shortable` TINYINT," +
                 "`exchange` VARCHAR(25)," +
-                "`assetClass` VARCHAR(25)," +
+                "`asset_class` VARCHAR(25)," +
                 "`updated` TIMESTAMP);" +
-            "DELETE FROM potentials WHERE potentials.assetID = NULL;");
+            "DELETE FROM potentials WHERE potentials.asset_id = NULL;");
         }
 
         public void ClearPotentialDB(Potential potential)
         {
-            _conn.Execute("DELETE FROM POTENTIALS WHERE assetID = @assetID;", new { assetID = potential.assetID });
+            _conn.Execute("DELETE FROM POTENTIALS WHERE asset_id = @asset_id;", new { assetID = potential.assetID });
         }
         
         public void CalculateStarValue(Potential p)

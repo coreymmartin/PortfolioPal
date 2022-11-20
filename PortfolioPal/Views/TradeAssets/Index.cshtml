@@ -46,27 +46,27 @@
             {
                 <tr>
                     <td><a href=/TradeAssets/TradedAsset/@a.symbol>@a.symbol</a></td>
-                    <td>@Math.Round(@a.price, 4)</td>
+                    <td>@Math.Round(@a.current_price, 4)</td>
                     <td>@Math.Round(@a.qty, 6)</td>
                     <td>@a.side</td>
-                    <td>@Math.Round(@a.marketValue, 2)</td>
-                    <td>@Math.Round(@a.costBasis, 2)</td>
-                    <td>@Math.Round(@a.plDollarsTotal, 2)</td>
-                    <td>@Math.Round(@a.plPercentTotal, 4)</td>
-                    <td>@Math.Round(@a.plDollarsToday, 2)</td>
-                    <td>@Math.Round(@a.plPercentToday, 4)</td>
+                    <td>@Math.Round(@a.market_value, 2)</td>
+                    <td>@Math.Round(@a.avg_entry_price, 2)</td>
+                    <td>@Math.Round(@a.pl_dollars_total, 2)</td>
+                    <td>@Math.Round(@a.port_pl_total, 4)</td>
+                    <td>@Math.Round(@a.pl_dollars_today, 2)</td>
+                    <td>@Math.Round(@a.port_pl_current, 4)</td>
                     <td>@Math.Round(@a.lastPrice, 2)</td>
                     <td>@Math.Round(@a.changeToday, 2)</td>
-                    <td>@Math.Round(@a.TotalTraded, 2)</td>
-                    <td>@a.NumberTrades</td>
-                    <td>@a.NumberBuys/@a.NumberSells</td>
+                    <td>@Math.Round(@a.amount_traded_total, 2)</td>
+                    <td>@a.num_trades_total</td>
+                    <td>@a.num_buys_total/@a.num_sells_total</td>
                     <td>@Math.Round(@a.TotalPLP, 4)</td>
                     <td>@Math.Round(@a.TotalPLD, 2)</td>
-                    <td>@Math.Round(@a.assetPLP, 4)</td>
+                    <td>@Math.Round(@a.asset_pl_total, 4)</td>
                     <td>@Math.Round(@a.performance, 4)</td>
-                    <td>@Math.Round(@a.priceBaseline, 2)</td>
+                    <td>@Math.Round(@a.start_price_total, 2)</td>
                     <td>@a.shortable</td>
-                    <td>@a.assetClass</td>
+                    <td>@a.asset_class</td>
                     <td>@a.exchange</td>
                 </tr>
             }

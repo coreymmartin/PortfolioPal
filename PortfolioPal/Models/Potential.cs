@@ -5,7 +5,7 @@ namespace PortfolioPal.Models
 {
     public class Potential
     {
-        public string asset_id { get; set; }
+        public string assetID { get; set; }
         public string symbol { get; set; }
         public double score {get; set;}
         public double price{ get; set; }

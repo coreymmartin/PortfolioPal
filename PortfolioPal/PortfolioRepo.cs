@@ -71,25 +71,25 @@ namespace PortfolioPal
             for (int i = 0; i < positions.Length; i++)
             {
                 var asset            = new Asset();
-                asset.assetID        = JObject.Parse(positions[i].ToString()).GetValue("assetID").ToString();
+                asset.asset_id        = JObject.Parse(positions[i].ToString()).GetValue("asset_id").ToString();
                 asset.symbol         = JObject.Parse(positions[i].ToString()).GetValue("symbol").ToString();
                 asset.exchange       = JObject.Parse(positions[i].ToString()).GetValue("exchange").ToString();
-                asset.assetClass     = JObject.Parse(positions[i].ToString()).GetValue("asset_class").ToString();
+                asset.asset_class     = JObject.Parse(positions[i].ToString()).GetValue("asset_class").ToString();
                 asset.qty            = double.Parse(JObject.Parse(positions[i].ToString()).GetValue("qty").ToString());
                 asset.side           = JObject.Parse(positions[i].ToString()).GetValue("side").ToString();
-                asset.marketValue    = double.Parse(JObject.Parse(positions[i].ToString()).GetValue("market_value").ToString());
-                asset.costBasis      = double.Parse(JObject.Parse(positions[i].ToString()).GetValue("cost_basis").ToString());
-                asset.plDollarsTotal = double.Parse(JObject.Parse(positions[i].ToString()).GetValue("unrealized_pl").ToString());
-                asset.plPercentTotal = double.Parse(JObject.Parse(positions[i].ToString()).GetValue("unrealized_plpc").ToString()) * 100;
-                asset.plDollarsToday = double.Parse(JObject.Parse(positions[i].ToString()).GetValue("unrealized_intraday_pl").ToString());
-                asset.plPercentToday = double.Parse(JObject.Parse(positions[i].ToString()).GetValue("unrealized_intraday_plpc").ToString()) * 100;
-                asset.price          = double.Parse(JObject.Parse(positions[i].ToString()).GetValue("current_price").ToString());
+                asset.market_value    = double.Parse(JObject.Parse(positions[i].ToString()).GetValue("market_value").ToString());
+                asset.avg_entry_price      = double.Parse(JObject.Parse(positions[i].ToString()).GetValue("cost_basis").ToString());
+                asset.pl_dollars_total = double.Parse(JObject.Parse(positions[i].ToString()).GetValue("unrealized_pl").ToString());
+                asset.port_pl_total = double.Parse(JObject.Parse(positions[i].ToString()).GetValue("unrealized_plpc").ToString()) * 100;
+                asset.pl_dollars_today = double.Parse(JObject.Parse(positions[i].ToString()).GetValue("unrealized_intraday_pl").ToString());
+                asset.port_pl_current = double.Parse(JObject.Parse(positions[i].ToString()).GetValue("unrealized_intraday_plpc").ToString()) * 100;
+                asset.current_price          = double.Parse(JObject.Parse(positions[i].ToString()).GetValue("current_price").ToString());
                 asset.lastPrice      = double.Parse(JObject.Parse(positions[i].ToString()).GetValue("lastday_price").ToString());
                 asset.changeToday    = double.Parse(JObject.Parse(positions[i].ToString()).GetValue("change_today").ToString());
                 p.portfolioPositions.Add(asset);
-                if (asset.assetClass == "us_equity")
+                if (asset.asset_class == "us_equity")
                     p.stockPositions.Add(asset);
-                else if (asset.assetClass == "crypto")
+                else if (asset.asset_class == "crypto")
                     p.cryptoPositions.Add(asset);
             }
         }
@@ -105,13 +105,13 @@ namespace PortfolioPal
             p.dividendHoldingLimit = p.equity * Portfolio.DividendDiversity;
             foreach (var asset in p.stockPositions)
                 if (asset.side == "long")
-                    longHolding += asset.marketValue;
+                    longHolding += asset.market_value;
                 else
-                    shortHolding += asset.marketValue;
+                    shortHolding += asset.market_value;
             foreach (var asset in p.dividendPositions)
-                dividendHolding += asset.marketValue;
+                dividendHolding += asset.market_value;
             foreach (var asset in p.cryptoPositions)
-                cryptoHolding += asset.marketValue;
+                cryptoHolding += asset.market_value;
             p.longHoldingActual     = longHolding;
             p.shortHoldingActual    = shortHolding;
             p.stockHoldingActual    = longHolding + Math.Abs(shortHolding);
