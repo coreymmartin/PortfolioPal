@@ -1,4 +1,4 @@
-﻿@model Portfolio
+﻿@model PortfolioPal.ViewModels.OverviewVM
 @{
     
 }
@@ -22,7 +22,7 @@
                 toolTipContent: "<b>{label}</b>: ${y}",
                 showInLegend: "true",
                 legendText: "{label}",
-                indexLabel: "{label} - ${y}",
+                //indexLabel: "{label} - ${y}",
                 dataPoints: @Html.Raw(ViewBag.PieDataPoints)
             }]
         });
@@ -30,7 +30,7 @@
         var chart = new CanvasJS.Chart("chartContainer-history", {
             animationEnabled: true,
             title: {
-                text: "Portfolio History"
+                text: "Daily Performance"
             },
             toolTip: {
                 shared: true
@@ -38,7 +38,7 @@
             data: [{
                 type: "line",
                 name: "Equity",
-                showInLegend: true,
+                showInLegend: false,
                 dataPoints: @Html.Raw(ViewBag.HistoryDataPoints)
             }]
         });
@@ -53,10 +53,17 @@
 
 <div class="container">
     <div class="row-mine">
+        <p id="market-performance">
+            Market Open: @Model.Portfolio.marketOpen.
+            SNP500: @Math.Round(@Model.Performance.SNPPerf,2) %.
+            DOW: @Math.Round(@Model.Performance.DOWPerf,2) %.
+            Russell: @Math.Round(@Model.Performance.RussellPerf,2) %.
+            Today's PL: ($@Math.Round(@Model.Portfolio.todaysPLD, 2)/@Math.Round(@Model.Portfolio.todaysPLP, 2)%)
+        </p>
+    </div>
+    <div class="row-mine">
         <div class="column-mine">
             <div class="row2-mine">
-                <p>Market Open: @Model.marketOpen</p>
-                <p>Today's PL: ($@Math.Round(@Model.todaysPLD, 2)/@Math.Round(@Model.todaysPLP, 2)%)</p>
             </div>
             <div class="row2-mine">
                 <div id="chartContainer-assetdiversity" style="height: 200px; width: 90%;"></div>
@@ -64,78 +71,81 @@
             </div>
             <h4>Portfolio Summary</h4>
             <div class="row2-mine">
-                <div class="table table-striped responsive px-3">
+                <div class="table-striped">
                     <table class="table-tiny">
                         <tr>
                             <th>Equity</th>
-                            <td>$@Math.Round(@Model.equity, 2)</td>
+                            <td>$@Math.Round(@Model.Portfolio.equity, 2)</td>
                         </tr>
                         <tr>
                             <th>LastEquity</th>
-                            <td>$@Math.Round(@Model.lastEquity, 2)</td>
+                            <td>$@Math.Round(@Model.Portfolio.lastEquity, 2)</td>
                         </tr>
                         <tr>
                             <th>Cash</th>
-                            <td>$@Math.Round(@Model.cash, 2)</td>
+                            <td>$@Math.Round(@Model.Portfolio.cash, 2)</td>
                         </tr>
                         <tr>
                             <th>Long/Short Market Value</th>
-                            <td>$@Math.Round(@Model.longMarketValue, 2)/-$@Math.Abs(@Math.Round(@Model.shortMarketValue, 2))</td>
+                            <td>$@Math.Round(@Model.Portfolio.longMarketValue, 2)/-$@Math.Abs(@Math.Round(@Model.Portfolio.shortMarketValue, 2))</td>
                         </tr>
                         <tr>
-                            <th>Account Number</th>
-                            <td>@Model.accountNumber</td>
-                        </tr>
-                        <tr>
-                            <th>Status</th>
-                            <td>@Model.status</td>
-                        </tr>
-                        <tr>
-                            <th>SryptoStatus</th>
-                            <td>@Model.cryptoStatus</td>
-                        </tr>
-                        <tr>
-                            <th>Currency</th>
-                            <td>@Model.currency</td>
-                        </tr>
-                        <tr>
-                            <th>BuyingPower</th>
-                            <td>$@Math.Round(@Model.buyingPower, 2)</td>
+                            <th>General/Crypto Status</th>
+                            <td>@Model.Portfolio.status / @Model.Portfolio.cryptoStatus</td>
                         </tr>
                         <tr>
                             <th>Accrued Fees</th>
-                            <td>$@Math.Round(@Model.accrued_fees, 2)</td>
+                            <td>$@Math.Round(@Model.Portfolio.accrued_fees, 2)</td>
                         </tr>
                         <tr>
                             <th>Day Trader</th>
-                            <td>@Model.patternDayTrader</td>
+                            <td>@Model.Portfolio.patternDayTrader</td>
+                        </tr>
+                        <tr>
+                            <th>Currency</th>
+                            <td>@Model.Portfolio.currency</td>
+                        </tr>
+                        <tr>
+                            <th>Account Number</th>
+                            <td>@Model.Portfolio.accountNumber</td>
                         </tr>
                         <tr>
                             <th>Birth</th>
-                            <td>@Model.createdAt</td>
+                            <td>@Model.Portfolio.createdAt</td>
                         </tr>
                     </table>
                 </div>
-                <div class="table table-striped">
+                <div class="table-striped">
                     <div class="column-mine">
                         <h5>Asset Diversity</h5>
                         <table class="table-tiny">
                             <tr>
-                                <th>Stock Holding<br>($@Math.Round(@Model.stockHoldingLimit, 2))</th>
-                                <td>$@Math.Round(@Model.stockHoldingActual, 2) (@Math.Round((@Model.stockHoldingActual / @Model.stockHoldingLimit) * 100, 2)%)</td>
+                                <th>Stock Holding</th>
+                                <td>
+                                    $@Math.Round(@Model.Portfolio.stockHoldingActual, 2) (@Math.Round((@Model.Portfolio.stockHoldingActual 
+                                    / @Model.Portfolio.stockHoldingLimit) * 100, 1)%) 
+                                    </br>/ ($@Math.Round(@Model.Portfolio.stockHoldingLimit, 2))
+                                </td>
                             </tr>
                             <tr>
-                                <th>Crypto Holding<br>($@Math.Round(@Model.cryptoHoldingLimit, 2))</th>
-                                <td>$@Math.Round(@Model.cryptoHoldingActual, 2) (@Math.Round((@Model.cryptoHoldingActual / @Model.cryptoHoldingLimit) * 100, 2)%)</td>
+                                <th>Crypto Holding</th>
+                                <td>
+                                    $@Math.Round(@Model.Portfolio.cryptoHoldingActual, 2) (@Math.Round((@Model.Portfolio.cryptoHoldingActual 
+                                    / @Model.Portfolio.cryptoHoldingLimit) * 100, 1)%) 
+                                    </br>/ ($@Math.Round(@Model.Portfolio.cryptoHoldingLimit, 2))
+                                </td>
                             </tr>
                             <tr>
-                                <th>Dividend Holding<br>($@Math.Round(@Model.dividendHoldingLimit, 2))</th>
-                                <td>$@Math.Round(@Model.dividendHoldingActual, 2) (@Math.Round((@Model.dividendHoldingActual / @Model.dividendHoldingLimit) * 100, 2)%)</td>
+                                <th>Dividend Holding</th>
+                                <td>
+                                    $@Math.Round(@Model.Portfolio.dividendHoldingActual, 2) (@Math.Round((@Model.Portfolio.dividendHoldingActual 
+                                    / @Model.Portfolio.dividendHoldingLimit) * 100, 1)%) 
+                                    </br>/ ($@Math.Round(@Model.Portfolio.dividendHoldingLimit, 2))
+                                </td>
                             </tr>
                         </table>
                     </div>
                 </div>
-
             </div>
         </div>
         <div class = "column-mine">
@@ -145,7 +155,7 @@
             </div>
             <div class="row2-mine">
                 <h4>Portfolio Positions</h4>
-                <div class="table">
+                <div class="table-scroll">
                     <table class="table table-striped responsive">
                         <tr>
                             <th>Symbol</th>
@@ -160,7 +170,7 @@
                             <th>Change today</th>
                             <th>Asset class</th>
                         </tr>
-                        @foreach (var pos in Model.portfolioPositions){
+                        @foreach (var pos in Model.Portfolio.portfolioPositions){
                             <tr>
                                 
                                 <td><a href=/TradeAssets/TradedAsset/@pos.symbol>@pos.symbol</a></td>
@@ -180,6 +190,40 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div class="row-mine">
+        <h3>Recent Orders</h3>
+    </div>
+    <div class="row-mine">
+        <div class="table-scroll">
+            <table class="table table-striped responsive">
+                <tr>
+                    <th>symbol</th>
+                    <th>side</th>
+                    <th>status</th>
+                    <th>filledQty</th>
+                    <th>filledPrice</th>
+                    <th>filledAt</th>
+                    <th>orderType</th>
+                    <th>assetClass</th>
+                    <th>clientOrderId</th>
+                </tr>
+                @foreach(var o in Model.Orders){
+                    <tr>
+                        <td><a href=/Orders/AssetOrders/@o.symbol>@o.symbol</a></td>
+                        <td>@o.side</td>
+                        <td>@o.status</td>
+                        <td>@o.filledQty</td>
+                        <td>@o.filledPrice</td>
+                        <td>@o.filledAt</td>
+                        <td>@o.orderType</td>
+                        <td>@o.assetClass</td>
+                        <td>@o.clientOrderId</td>
+                    </tr>
+                }
+            </table>
+        </div>
+
     </div>
 </div>
 

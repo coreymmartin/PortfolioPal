@@ -20,10 +20,16 @@
                 dataPoints: @Html.Raw(ViewBag.AssetEquity)
             }, {
                 type: "scatter",
-                name: "orders",
+                name: "sells",
                 xValueType: "datetime",
                 showInLegend: true,
-                dataPoints: @Html.Raw(ViewBag.OrderDatas)
+                dataPoints: @Html.Raw(ViewBag.OrderDatasSell)
+            }, {
+                type: "scatter",
+                name: "buys",
+                xValueType: "datetime",
+                showInLegend: true,
+                dataPoints: @Html.Raw(ViewBag.OrderDatasBuy)
             }]
         });
         chart.render();
@@ -34,22 +40,19 @@
 <h2>@Model.asset.symbol</h2>
 
 <div id="assets-actions">
-<ul>
-    <li><a class="testes" asp-area="" asp-controller="TradeAssets" asp-action="Index">All Trade Assets</a></li>
-    <li><a class="testes" asp-area="" asp-controller="TradeAssets" asp-action="UpdateAssets">Update Trade Asset</a></li>
-    <li><a class="testes" asp-area="" asp-controller="TradeAssets" asp-action="Index">Reset Trade Assets</a></li>
-    <li><a class="testes" asp-area="" asp-controller="TradeAssets" asp-action="Index">Edit Trade Assets</a></li>
-</ul>
+    <ul>
+        <li><a class="testes" asp-area="" asp-controller="TradeAssets" asp-action="Index">All Trade Assets</a></li>
+        <li><a class="testes" asp-area="" asp-controller="TradeAssets" asp-action="UpdateAssets">Update Trade Asset</a></li>
+        <li><a class="testes" asp-area="" asp-controller="TradeAssets" asp-action="Index">Reset Trade Assets</a></li>
+        <li><a class="testes" asp-area="" asp-controller="TradeAssets" asp-action="Index">Edit Trade Assets</a></li>
+    </ul>
 </div>
-
 <div id="chartContainer-assethistory" style="height: 370px; width: 75%;"></div>
 <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
-
-
 <div id="active-assets-overview">
     <h3>Asset Info</h3>
     <section>
-        <table class="table table-striped responsive">
+        <table class="table-tiny table-striped responsive">
             <tr>
                 <th>Symbol</th>
                 <th>TotalPL(%)</th>
@@ -105,7 +108,7 @@
         </table>
     </section>
     <section>
-        <table class="table">
+        <table class="table table-scroll table-striped responsive">
             <tr>
                 <th>Symbol</th>
                 <th>FilledQty</th>

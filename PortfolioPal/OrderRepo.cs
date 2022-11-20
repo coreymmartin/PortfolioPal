@@ -16,11 +16,11 @@ namespace PortfolioPal
 {
     public class OrderRepo : IOrderRepo
     {
-        private HttpClient _clientBroker;
+        private readonly HttpClient _clientBroker;
         private readonly IDbConnection _conn;
-        private string APCA_API_KEY = JObject.Parse(File.ReadAllText("keychain.json")).GetValue("alpaca_key").ToString();
-        private string APCA_API_SECRET = JObject.Parse(File.ReadAllText("keychain.json")).GetValue("alpaca_secret").ToString();
-        private string APCA_API_URL = JObject.Parse(File.ReadAllText("keychain.json")).GetValue("alpaca_url").ToString();
+        private readonly string APCA_API_KEY = JObject.Parse(File.ReadAllText("keychain.json")).GetValue("alpaca_key").ToString();
+        private readonly string APCA_API_SECRET = JObject.Parse(File.ReadAllText("keychain.json")).GetValue("alpaca_secret").ToString();
+        private readonly string APCA_API_URL = JObject.Parse(File.ReadAllText("keychain.json")).GetValue("alpaca_url").ToString();
         private bool tableConfirmed = false;
         public List<Order> RecentFilledOrders;
         public List<Order> AllFilledOrders;
@@ -47,7 +47,6 @@ namespace PortfolioPal
         {
             _conn.Execute("DROP TABLE IF EXISTS `orders`; " +
                 "CREATE TABLE `orders`( " +
-                "`orderIndex` INT AUTO_INCREMENT PRIMARY KEY, " +
                 "`symbol` VARCHAR(10), " +
                 "`side` VARCHAR(10), " +
                 "`filledQty` FLOAT(10), " +
@@ -73,17 +72,34 @@ namespace PortfolioPal
             }
         }
 
+        public string FormatDate(string inputDate)
+        {
+            bool goodDate = DateTime.TryParse(inputDate, out DateTime tempDate);
+            if (goodDate)
+            {
+                var tempMonth = tempDate.Month.ToString().PadLeft(2, '0');
+                var tempDay = tempDate.Day.ToString().PadLeft(2, '0');
+                var tempYear = tempDate.Year.ToString();
+                var tempHour = tempDate.Hour.ToString().PadLeft(2, '0');
+                var tempMinute = tempDate.Minute.ToString().PadLeft(2, '0');
+                var tempSecond = tempDate.Second.ToString().PadLeft(2, '0');
+                return tempYear + "-" + tempMonth + "-" + tempDay + "T" + tempHour + ":" + tempMinute + ":" + tempSecond + "Z";
+            }
+            else { return ""; }
+        }
+
         public List<Order> GetBatchOrders(string status = "none", int limit = 0, string afterUntilKey = "none", string afterUntilValue = "none", string direction = "none")
         {
             // initialize values
             string urlQueries = "?";
             var statusLabel = (status == "open" || status == "closed" || status == "all") ? $"status={status}" : "status=closed";
-            var limitLabel = (limit == 0 || limit < 0 || limit > 500) ? "limit=100" : $"limit={limit}";
+            var limitLabel = (limit == 0 || limit < 0 || limit > 500) ? "limit=500" : $"limit={limit}";
             var afterUntilKeyLabel = (afterUntilKey != "after" && afterUntilKey != "until") ? "" : $"{afterUntilKey}=";
             string afterUntilValueLabel = "";
             if (afterUntilKeyLabel != "" && afterUntilValue != "none") {
-                var templabel = (afterUntilValue.Contains(" ")) ? afterUntilValue.Substring(0, afterUntilValue.IndexOf(" ")) : afterUntilValue;
-                afterUntilValueLabel = (DateTime.TryParse(templabel, out DateTime goodDate)) ? (direction == "desc" && goodDate == DateTime.Today) ? $"{goodDate.AddDays(1).ToShortDateString()}" : $"{goodDate.ToShortDateString()}" : "";
+                //string templabel = !afterUntilValue.Contains(" ") ? afterUntilValue : afterUntilValue[..afterUntilValue.IndexOf(" ")];
+                //afterUntilValueLabel = (DateTime.TryParse(templabel, out DateTime goodDate)) ? (direction == "desc" && goodDate == DateTime.Today) ? $"{goodDate.AddDays(1).ToShortDateString()}" : $"{goodDate.ToShortDateString()}" : "";
+                afterUntilValueLabel = FormatDate(afterUntilValue);
             }
             var directionLabel = (direction == "asc" || direction == "desc") ? $"direction={direction}" : "";
             urlQueries += (statusLabel != "") ? $"{statusLabel}&" : "";
@@ -92,7 +108,7 @@ namespace PortfolioPal
             urlQueries += (afterUntilKeyLabel == "" || afterUntilValueLabel == "") ? "" : $"{afterUntilValueLabel}&";
             urlQueries += (directionLabel != "") ? $"{directionLabel}" : "";
             if (urlQueries[^1].ToString() == "&" || urlQueries[^1].ToString() == "?") {
-                urlQueries = (urlQueries == "?" || urlQueries == "&") ? "" : urlQueries.Substring(0, urlQueries.Length - 1);
+                urlQueries = (urlQueries == "?" || urlQueries == "&") ? "" : urlQueries[..^1];
             }
             List<Order> batchOrders = new List<Order>();
             //var ordersURL = $"{APCA_API_URL}/v2/orders?status={status}&limit={limit}&{afterUntilKey}={afterUntilValueLabel}&direction={direction}";
@@ -103,18 +119,20 @@ namespace PortfolioPal
             {
                 if (JObject.Parse(ordersInfo[i].ToString()).GetValue("status").ToString() == "filled")
                 {
-                    var order = new Order();
-                    order.orderID = JObject.Parse(ordersInfo[i].ToString()).GetValue("id").ToString();
-                    order.clientOrderId = JObject.Parse(ordersInfo[i].ToString()).GetValue("client_order_id").ToString();
-                    order.status = JObject.Parse(ordersInfo[i].ToString()).GetValue("status").ToString();
-                    order.filledAt = JObject.Parse(ordersInfo[i].ToString()).GetValue("filled_at").ToString();
-                    order.symbol = JObject.Parse(ordersInfo[i].ToString()).GetValue("symbol").ToString();
-                    order.side = JObject.Parse(ordersInfo[i].ToString()).GetValue("side").ToString();
-                    order.assetID = JObject.Parse(ordersInfo[i].ToString()).GetValue("asset_id").ToString();
-                    order.assetClass = JObject.Parse(ordersInfo[i].ToString()).GetValue("asset_class").ToString();
-                    order.filledQty = Convert.ToDouble(JObject.Parse(ordersInfo[i].ToString()).GetValue("filled_qty"));
-                    order.qty = Convert.ToDouble(JObject.Parse(ordersInfo[i].ToString()).GetValue("qty"));
-                    order.orderType = JObject.Parse(ordersInfo[i].ToString()).GetValue("order_type").ToString();
+                    var order = new Order
+                    {
+                        orderID = JObject.Parse(ordersInfo[i].ToString()).GetValue("id").ToString(),
+                        clientOrderId = JObject.Parse(ordersInfo[i].ToString()).GetValue("client_order_id").ToString(),
+                        status = JObject.Parse(ordersInfo[i].ToString()).GetValue("status").ToString(),
+                        filledAt = JObject.Parse(ordersInfo[i].ToString()).GetValue("filled_at").ToString(),
+                        symbol = JObject.Parse(ordersInfo[i].ToString()).GetValue("symbol").ToString(),
+                        side = JObject.Parse(ordersInfo[i].ToString()).GetValue("side").ToString(),
+                        assetID = JObject.Parse(ordersInfo[i].ToString()).GetValue("assetID").ToString(),
+                        assetClass = JObject.Parse(ordersInfo[i].ToString()).GetValue("asset_class").ToString(),
+                        filledQty = Convert.ToDouble(JObject.Parse(ordersInfo[i].ToString()).GetValue("filled_qty")),
+                        qty = Convert.ToDouble(JObject.Parse(ordersInfo[i].ToString()).GetValue("qty")),
+                        orderType = JObject.Parse(ordersInfo[i].ToString()).GetValue("order_type").ToString()
+                    };
                     double.TryParse(JObject.Parse(ordersInfo[i].ToString()).GetValue("filled_avg_price").ToString(), out double p1);
                     double.TryParse(JObject.Parse(ordersInfo[i].ToString()).GetValue("limit_price").ToString(), out double p2);
                     order.filledPrice = (p1 != p2 || (p1 != 0 && p2 != 0)) ? (p1 != 0) ? p1 : p2 : 0;
@@ -169,52 +187,73 @@ namespace PortfolioPal
         {
             List<Order> batchOrders;
             string newRequestStartDate;
-            var RequestStartDate = GetLatestOrderDB().filledAt;
+            var RequestStartDate = FormatDate(GetLatestOrderDB().filledAt);
             bool getMore = true;
+            int retrys = 0;
             do {
                 batchOrders = GetBatchOrders("closed", 500, "after", RequestStartDate, "asc");
                 if (batchOrders.Count() > 0) {
-                    newRequestStartDate = batchOrders.Last().filledAt;
-                    if (newRequestStartDate == RequestStartDate) {
-                        getMore = false; }
-                    else {
+                    newRequestStartDate = FormatDate(batchOrders.Last().filledAt);
+                    if (newRequestStartDate == RequestStartDate)
+                    {
+                        if (DateTime.TryParse(newRequestStartDate, out DateTime dateCheck))
+                        {
+                            var tempToday = DateTime.Today;
+                            if (dateCheck.Month <= tempToday.Month)
+                            {
+                                if (tempToday.Day - dateCheck.Day > 1){
+                                    retrys += 1;
+                                    RequestStartDate = FormatDate(Convert.ToDateTime(GetLatestOrderDB().filledAt).AddDays(retrys).ToString());
+                                }
+                                else if (tempToday.Hour == dateCheck.Hour && tempToday.Minute == dateCheck.Minute) {
+                                    retrys += 1;
+                                    RequestStartDate = FormatDate(Convert.ToDateTime(GetLatestOrderDB().filledAt).AddDays(retrys).ToString());
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
                         AddOrdersToDB(batchOrders);
                         batchOrders.Clear();
-                        RequestStartDate = newRequestStartDate; }
+                        RequestStartDate = newRequestStartDate;
+                    }
+                }
+                else if (RequestStartDate != FormatDate(DateTime.Today.ToString())){
+                    retrys += 1;
+                    RequestStartDate = FormatDate(Convert.ToDateTime(GetLatestOrderDB().filledAt).AddDays(retrys).ToString());
                 }
                 else {
                     getMore = false; }
-            } while (getMore);
+            } while (getMore && retrys <= 5);
         }
 
         public Order GetLatestOrderDB()
         {
             CheckForTable();
-            return _conn.QuerySingle<Order>("SELECT * FROM orders ORDER BY orderIndex DESC LIMIT 1");
+            return _conn.QuerySingle<Order>("SELECT * FROM orders ORDER BY filledAt DESC LIMIT 1");
         }
-        public void GetLatestOrdersBroker(int numRecents = 100)
+        public void GetLatestOrdersBroker()
         {
-            //RecentFilledOrders = GetBatchOrders("filled", numRecents, "until", DateTime.Today.ToShortDateString(), "desc");
-            //RecentFilledOrders = GetBatchOrders("", numRecents, "", "", "");
             RecentFilledOrders = GetBatchOrders();
         }
 
         public IEnumerable<Order> ReadLatestOrdersDB(int qty)
         {
             CheckForTable();
-            return _conn.Query<Order>($"SELECT * FROM orders ORDER BY orderIndex DESC LIMIT {qty}");
+            return _conn.Query<Order>($"SELECT * FROM orders ORDER BY filledAt DESC LIMIT {qty}");
         }
 
         public IEnumerable<Order> ReadAllOrdersDB()
         {
             CheckForTable();
-            return _conn.Query<Order>($"SELECT * FROM orders ORDER BY orderIndex DESC;");
+            return _conn.Query<Order>($"SELECT * FROM orders ORDER BY filledAt DESC;");
         }
 
         public IEnumerable<Order> ReadAssetOrders(string asset, int limit = 500)
         {
             CheckForTable();
-            return _conn.Query<Order>($"SELECT * FROM orders WHERE symbol = '{asset}' ORDER BY orderIndex DESC LIMIT {limit};");
+            return _conn.Query<Order>($"SELECT * FROM orders WHERE symbol = '{asset}' ORDER BY filledAt DESC LIMIT {limit};");
         }
 
         public void GetNumTradedAssetsDB() {
@@ -284,7 +323,7 @@ namespace PortfolioPal
             return _conn.Query<string>("SELECT distinct symbol from orders").ToList();
         }
 
-        public List<ChartDataPoint> ExtractOrderData(List<Order> orders)
+        public List<ChartDataPoint> ExtractOrderData(List<Order> orders, string side)
         {
             string _date;
             double _price;
@@ -292,10 +331,13 @@ namespace PortfolioPal
             orders.Reverse();
             foreach (var o in orders)
             {
-                _date = o.filledAt;
-                _price = (double.TryParse(o.filledPrice.ToString(), out double d)) ? d : 0;
-                if (_price != 0){
-                    orderDataPoints.Add(new ChartDataPoint(_date.ToString(), _price));
+                if (o.side == side)
+                {
+                    _date = o.filledAt;
+                    _price = (double.TryParse(o.filledPrice.ToString(), out double d)) ? d : 0;
+                    if (_price != 0){
+                        orderDataPoints.Add(new ChartDataPoint(_date.ToString(), _price));
+                    }
                 }
             }
             return orderDataPoints;
@@ -339,8 +381,7 @@ namespace PortfolioPal
 
         public Asset GetUpdatedAssetStats(string symbol)
         {
-            Asset asset = new Asset();
-            asset.symbol = symbol;
+            Asset asset = new Asset{ symbol = symbol };
             CalcAssetTotalTraded(asset);
             CalcAssetNumberTrades(asset);
             CalcAssetNumberBuys(asset);

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using PortfolioPal.Models;
+using PortfolioPal.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,22 +15,29 @@ namespace PortfolioPal.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IPortfolioRepo portRepo;
+        private readonly IOrderRepo orderRepo;
 
-        public HomeController(ILogger<HomeController> logger, IPortfolioRepo portRepo)
+
+        public HomeController(ILogger<HomeController> logger, IPortfolioRepo portRepo, IOrderRepo orderRepo)
         {
             this.portRepo = portRepo;
+            this.orderRepo = orderRepo;
             _logger = logger;
         }
 
         public IActionResult Index()
         {
+            OverviewVM overview = new OverviewVM();
             var p = portRepo.GetAccount();
             portRepo.CheckMarketOpen(p);
             portRepo.GetAllPortfolioPositions(p);
             portRepo.UpdatePortfolioDiversity(p);
             ViewBag.PieDataPoints = JsonConvert.SerializeObject(portRepo.GetDiversityChartValues(p));
-            ViewBag.HistoryDataPoints = JsonConvert.SerializeObject(portRepo.GetPortfolioHistory("1D", "15Min"));
-            return View(p);
+            ViewBag.HistoryDataPoints = JsonConvert.SerializeObject(portRepo.GetPortfolioHistory("1D", "5Min"));
+            overview.Portfolio = p;
+            overview.Performance = portRepo.GetMarketPerformance();
+            overview.Orders = orderRepo.GetBatchOrders("closed", 10, "none", "none", "none");
+            return View(overview);
         }
 
         public IActionResult Privacy()

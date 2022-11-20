@@ -17,10 +17,11 @@ html {
 
 .container {
   width: 100%;
-  padding-right: 15px;
-  padding-left: 15px;
-  margin-right: auto;
-  margin-left: auto;
+  padding-right: 2px;
+  padding-left: 2px;
+  margin-right: 3px;
+  margin-left: 3px;
+  background-color: blueviolet;
 }
 
 @media (min-width: 576px) {
@@ -49,8 +50,8 @@ html {
 
 .container-fluid {
   width: 100%;
-  padding-right: 15px;
-  padding-left: 15px;
+  padding-right: 10px;
+  padding-left: 10px;
   margin-right: auto;
   margin-left: auto;
 }

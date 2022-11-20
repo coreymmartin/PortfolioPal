@@ -30,27 +30,23 @@ namespace PortfolioPal
         public List<Asset> AllTradableAssets {get; set;}
         public List<string> AllTradableAssetSymbols {get; set;}
         public List<Asset> FilteredAssets {get; set;}
-        public List<string> UserSelectedAssetsRequired {get; set;}
-        public List<string> UserSelectedAssetsOptional {get; set;}
+        public List<string> UserSelectedAssetsTrade {get; set;}
+        public List<string> UserSelectedAssetsTrade_Stocks {get; set;}
+        public List<string> UserSelectedAssetsTrade_Coins {get; set;}
+        public List<string> UserSelectedAssetsDividend {get; set;}
         public List<string> AllOptionalAssets {get; set;}
         public List<string> DividendAssets {get; set;}
-
-
         public List<Asset> AllTradedAssets {get; set;}
         public List<string> AllTradedAssetsSymbols {get; set;}
-
-
 
         public AssetRepo (IDbConnection conn)
         {
             _conn = conn;
             _clientBroker = new HttpClient();
-            _clientBroker.DefaultRequestHeaders.Add("APCA-API-KEY-ID", APCA_API_KEY);       // fix this its messy.
+            _clientBroker.DefaultRequestHeaders.Add("APCA-API-KEY-ID", APCA_API_KEY);
             _clientBroker.DefaultRequestHeaders.Add("APCA-API-SECRET-KEY", APCA_API_SECRET);
-
         }
         
-
         public async Task<string> AwaitClientGetReponse(HttpClient client, string url)
         {
             return await client.GetStringAsync(url);   
@@ -85,7 +81,6 @@ namespace PortfolioPal
         {
             var assetURL = $"{APCA_API_URL}/v2/assets/{symbol}";
             var assetResponse = AwaitClientGetReponse(_clientBroker, assetURL).Result;
-            //var assetInfo = JObject.Parse(assetResponse.Result);
             Asset asset = new Asset();
             asset.symbol = JObject.Parse(assetResponse).GetValue("symbol").ToString();
             asset.assetID = JObject.Parse(assetResponse).GetValue("id").ToString();
@@ -116,9 +111,6 @@ namespace PortfolioPal
 
         public List<ChartDataPoint> GetAssetPriceHistory(string symbol, int limit = 25, string start = "none", string timeframe = "15Min")
         {
-            // query parameters for timeframe, start, end, limit, yada, yada
-            // start/end must be in YYY-MM-DDT00:00:00Z
-            // maybe try: dateTime.ToString("yyyy-MM-dd'T'HH:mm:ss.fffzzz", DateTimeFormatInfo.InvariantInfo);
             var startLabel = (start == "none") ? "" : $"&start={start}";
             var pricesURL = $"{APCA_DATA_API_URL}/v2/stocks/{symbol}/bars?timeframe={timeframe}&limit={limit}{startLabel}";
             var pricesResponse = AwaitClientGetReponse(_clientBroker, pricesURL).Result;
@@ -130,7 +122,6 @@ namespace PortfolioPal
                 assetHistory.Add(new ChartDataPoint(pricesTime.ToString(), Convert.ToDouble(pricesClose)));
             }
             return assetHistory;
-
         }
 
        public void UpdatePortfolioAssetStats(List<string> assets)
@@ -142,8 +133,8 @@ namespace PortfolioPal
             var portfolio = JArray.Parse(portfolioResponse).ToArray();
             for (int i = 0; i < portfolio.Length; i++)
             {
-                var asset            = new Asset();
-                asset.assetID        = JObject.Parse(portfolio[i].ToString()).GetValue("asset_id").ToString();
+                var asset = new Asset();
+                asset.assetID        = JObject.Parse(portfolio[i].ToString()).GetValue("assetID").ToString();
                 asset.symbol         = JObject.Parse(portfolio[i].ToString()).GetValue("symbol").ToString();
                 asset.exchange       = JObject.Parse(portfolio[i].ToString()).GetValue("exchange").ToString();
                 asset.assetClass     = JObject.Parse(portfolio[i].ToString()).GetValue("asset_class").ToString();
@@ -173,7 +164,6 @@ namespace PortfolioPal
             foreach (var r in refreshed){
                 ClosedDailyStatsDB(r);
             }
-                
         }
 
         public List<string> ReadUserSelectedFile(string which)
@@ -181,90 +171,197 @@ namespace PortfolioPal
             string[] fileContent;
             switch (which.ToLower())
             {
-                case "optional":
-                    fileContent = File.ReadAllLines("TradeData/UserSelectedAssets/Optional_Stocks.txt");
+                case "dividend":
+                    fileContent = File.ReadAllLines("TradeData/UserSelectedAssets/Dividend_Assets.txt");
+                    break;
+                case "coins":
+                    fileContent = File.ReadAllLines("TradeData/UserSelectedAssets/Trade_Assets_Coins.txt");
                     break;
                 default:
-                case "required":
-                    fileContent = File.ReadAllLines("TradeData/UserSelectedAssets/Required_Stocks.txt");
+                case "stocks":
+                    fileContent = File.ReadAllLines("TradeData/UserSelectedAssets/Trade_Assets_Stocks.txt");
                     break;
             }
             return fileContent.ToList();
         }
         public void SetUserSelectedDB()
         {
-            UserSelectedAssetsRequired = ReadUserSelectedFile("required");
-            UserSelectedAssetsOptional = ReadUserSelectedFile("optional");
+            UserSelectedAssetsTrade_Stocks = ReadUserSelectedFile("stocks");
+            UserSelectedAssetsTrade_Coins = ReadUserSelectedFile("coins");
+            UserSelectedAssetsDividend = ReadUserSelectedFile("dividend");
+            UserSelectedAssetsTrade = new List<string>();
             _conn.Execute("DROP TABLE IF EXISTS `userselectedassets`;" +
             "CREATE TABLE `userselectedassets`(`symbol` VARCHAR(15), `assetClass` VARCHAR(25), `classification` VARCHAR(25));");
-            foreach (var asset in UserSelectedAssetsRequired)
+            foreach (var s in UserSelectedAssetsTrade_Stocks){
+                if (!UserSelectedAssetsTrade.Contains(s)) {
+                    UserSelectedAssetsTrade.Add(s);
+                }
                 _conn.Execute("INSERT INTO userselectedassets (symbol, assetClass, classification) VALUES (@symbol, @assetClass, @classification);",
-                new { symbol = asset, assetClass = "us_equity", classification = "userpreferred" });
-            foreach (var asset in UserSelectedAssetsOptional)
+                new { symbol = s, assetClass = "us_equity", classification = "usertrade" });
+            }
+            foreach (var c in UserSelectedAssetsTrade_Coins){
+                if (!UserSelectedAssetsTrade.Contains(c)) {
+                    UserSelectedAssetsTrade.Add(c);
+                }
                 _conn.Execute("INSERT INTO userselectedassets (symbol, assetClass, classification) VALUES (@symbol, @assetClass, @classification);",
-                new { symbol = asset, assetClass = "us_equity", classification = "useroptional" });
+                new { symbol = c, assetClass = "crypto", classification = "usertrade" });
+            }
+            foreach (var asset in UserSelectedAssetsDividend)
+                _conn.Execute("INSERT INTO userselectedassets (symbol, assetClass, classification) VALUES (@symbol, @assetClass, @classification);",
+                new { symbol = asset, assetClass = "us_equity", classification = "userdividend" });
         }
-        public List<string> GetUserSelectedRequiredDB()
+        public List<string> GetUserSelectedTradeDB()
         {
             SetUserSelectedDB();
-            return UserSelectedAssetsRequired;
+            return UserSelectedAssetsTrade;
         }
-        public List<string> GetUserSelectedOptionalDB()
+        public List<string> GetUserSelectedDividendDB()
         {
             SetUserSelectedDB();
-            return UserSelectedAssetsOptional;
+            return UserSelectedAssetsDividend;
         }
-        public IEnumerable<string> GetUserSelectedRequired()
+        public IEnumerable<string> GetUserSelectedTrade()
         {
-            if (UserSelectedAssetsRequired == null){
-                UserSelectedAssetsRequired = GetUserSelectedRequiredDB();
+            if (UserSelectedAssetsTrade == null){
+                UserSelectedAssetsTrade = GetUserSelectedTradeDB();
             }
-            return UserSelectedAssetsRequired;
+            return UserSelectedAssetsTrade;
         }
-        public IEnumerable<string> GetUserSelectedOptional()
+        public IEnumerable<string> GetUserSelectedDividend()
         {
-            if (UserSelectedAssetsOptional == null){
-                UserSelectedAssetsOptional = GetUserSelectedOptionalDB();
+            if (UserSelectedAssetsDividend == null){
+                UserSelectedAssetsDividend = GetUserSelectedDividendDB();
             }
-            return UserSelectedAssetsOptional;
+            return UserSelectedAssetsDividend;
         }
-  
+        // you must fix all of this because you changed the number and names of the values! have fun!!!
         public void CreateTradedAssetTable()
         {
             _conn.Execute("DROP TABLE IF EXISTS `tradedassets`; " +
-                "CREATE TABLE `tradedassets`( " +
-                    "`assetID` VARCHAR(100) PRIMARY KEY, " +
-                    "`symbol` VARCHAR(10), " +
-                    "`exchange` VARCHAR(25), " +
-                    "`assetClass` VARCHAR(25), " +
-                    "`shortable` TINYINT, " +
-                    "`qty` FLOAT(10), " +
-                    "`side` VARCHAR(25), " +
-                    "`marketValue` FLOAT(10), " +
-                    "`costBasis` FLOAT(10), " +
-                    "`plDollarsTotal` FLOAT(10), " +
-                    "`plPercentTotal` FLOAT(10), " +
-                    "`plDollarsToday` FLOAT(10), " +
-                    "`plPercentToday` FLOAT(10), " +
-                    "`price` FLOAT(10), " +
-                    "`lastPrice` FLOAT(10), " +
-                    "`changeToday` FLOAT(10), " +
-                    "`TotalTraded` FLOAT(10), " +
-                    "`NumberTrades` FLOAT(10), " +
-                    "`NumberBuys` FLOAT(10), " +
-                    "`NumberSells` FLOAT(10), " +
-                    "`TotalPLP` FLOAT(10), " +
-                    "`TotalPLD` FLOAT(10), " +
-	                "`priceBaseline` FLOAT(10), " +
-                    "`assetPLP` FLOAT(10), " +
-                    "`performance` FLOAT(10), " +
-                    "`created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
-                    "`updated` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP " +
-                ");");
+                CREATE TABLE `tradedassets`(
+	            `asset_id` VARCHAR(50) PRIMARY KEY,
+                `symbol` VARCHAR(10),
+                `asset_class` VARCHAR(15),
+                `classification` VARCHAR(15),
+                `tradable` TINYINT,
+                `shortable` TINYINT,
+                `side` VARCHAR(10),
+                `qty` FLOAT(10),
+                `num_trades_current` FLOAT(10),
+                `num_trades_total` FLOAT(10),
+                `num_buys_current` FLOAT(10),
+                `num_sells_current` FLOAT(10),
+                `num_buys_total` FLOAT(10),
+                `num_sells_total` FLOAT(10),
+                `current_price` FLOAT(10),
+                `market_value` FLOAT(10),
+                `avg_entry_price` FLOAT(10),
+                `hsl_limit_long` FLOAT(10),
+                `tsl_limit_long` FLOAT(10),
+                `tsl_enable_long` FLOAT(10),
+                `hsl_limit_short` FLOAT(10),
+                `tsl_limit_short` FLOAT(10),
+                `tsl_enable_short` FLOAT(10),
+                `hsl_trigger` FLOAT(10),
+                `tsl_trigger` FLOAT(10),
+                `allowance` FLOAT(10),
+                `max_active_price` FLOAT(10),
+                `min_active_price` FLOAT(10),
+                `tradestamp` FLOAT(25),
+                `start_price_current` FLOAT(10),
+                `start_price_total` FLOAT(10),
+                `asset_max_price_current` FLOAT(10),
+                `asset_max_price_total` FLOAT(10),
+                `asset_min_price_current` FLOAT(10),
+                `asset_min_price_total` FLOAT(10),
+                `asset_pl_current` FLOAT(10),
+                `asset_pl_total` FLOAT(10),
+                `port_pl_now` FLOAT(10),
+                `port_pl_running` FLOAT(10),
+                `port_pl_current` FLOAT(10),
+                `port_pl_total` FLOAT(10),
+                `port_perf_per_current` FLOAT(10),
+                `port_perf_per_total` FLOAT(10),
+                `port_max_pl_current` FLOAT(10),
+                `port_max_pl_total` FLOAT(10),
+                `port_min_pl_current` FLOAT(10),
+                `port_min_pl_total` FLOAT(10),
+                `pl_dollars_current` FLOAT(10),
+                `pl_dollars_total` FLOAT(10),
+                `amount_traded_current` FLOAT(10),
+                `amount_traded_total` FLOAT(10),
+                `roi_current` FLOAT(10),
+                `roi_total` FLOAT(10),
+                `hsl_signal` VARCHAR(10),
+                `tsl_signal` VARCHAR(10),
+                `day_signal` VARCHAR(10),
+                `hour_signal` VARCHAR(10),
+                `15Min_signal` VARCHAR(10),
+                `master_signal` VARCHAR(10),
+                `strategy_champ` VARCHAR(15),
+                `strategy_day` VARCHAR(15),
+                `strategy_hour` VARCHAR(15),
+                `strategy_15Min` VARCHAR(15),
+                `diversity_signal` VARCHAR(5),
+                `betty_day_period_long` FLOAT(5),
+                `betty_day_period_short` FLOAT(5),
+                `betty_hour_period_long` FLOAT(5),
+                `betty_hour_period_short` FLOAT(5),
+                `betty_15Min_period_long` FLOAT(5),
+                `betty_15Min_period_short` FLOAT(5),
+                `mercy_day_slow` FLOAT(5),
+                `mercy_day_fast` FLOAT(5),
+                `mercy_day_smooth` FLOAT(5),
+                `mercy_hour_slow` FLOAT(5),
+                `mercy_hour_fast` FLOAT(5),
+                `mercy_hour_smooth` FLOAT(5),
+                `mercy_15Min_slow` FLOAT(5),
+                `mercy_15Min_fast` FLOAT(5),
+                `mercy_15Min_smooth` FLOAT(5),
+                `polly_day_period` FLOAT(5),
+                `polly_day_future` FLOAT(5),
+                `polly_hour_period` FLOAT(5),
+                `polly_hour_future` FLOAT(5),
+                `polly_15Min_period` FLOAT(5),
+                `polly_15Min_future` FLOAT(5),
+                `betty_opt_pl_day` FLOAT(10),
+                `betty_opt_pl_hour` FLOAT(10),
+                `betty_opt_pl_15Min` FLOAT(10),
+                `mercy_opt_pl_day` FLOAT(10),
+                `mercy_opt_pl_hour` FLOAT(10),
+                `mercy_opt_pl_15Min` FLOAT(10),
+                `polly_opt_pl_day` FLOAT(10),
+                `polly_opt_pl_hour` FLOAT(10),
+                `polly_opt_pl_15Min` FLOAT(10),
+                `tsl_long_opt_pl` FLOAT(10),
+                `tsl_short_opt_pl` FLOAT(10),
+                `betty_optimized` FLOAT(15),
+                `betty_optcomplete_day` FLOAT(5),
+                `betty_optcomplete_hour` FLOAT(5),
+                `betty_optcomplete_15Min` FLOAT(5),
+                `mercy_optimized` FLOAT(15),
+                `mercy_optcomplete_day` FLOAT(5),
+                `mercy_optcomplete_hour` FLOAT(5),
+                `mercy_optcomplete_15Min` FLOAT(5),
+                `polly_optimized` FLOAT(15),
+                `polly_optcomplete_day` FLOAT(5),
+                `polly_optcomplete_hour` FLOAT(5),
+                `polly_optcomplete_15Min` FLOAT(5),
+                `tsl_long_optcomplete` FLOAT(5),
+                `tsl_short_optcomplete` FLOAT(5),
+                `tsl_optimized` FLOAT(15),
+                `min_order_qty` FLOAT(10),
+                `inc_order_qty` FLOAT(10),
+                `status_check` FLOAT(15),
+                `updated` VARCHAR(50),
+                `strategy_timestamp` VARCHAR(50),
+                `created` VARCHAR(50));
+
+);
         }
 
         public IEnumerable<Asset> GetAllTradedAssetsDB(){
-            return _conn.Query<Asset>("SELECT * FROM tradedassets ORDER BY ABS(marketValue) DESC;");
+            return _conn.Query<Asset>("SELECT * FROM tradedassets ORDER BY symbol ASC;");
         }
 
         public List<string> GetAllTradedSymbolsDB()
@@ -275,7 +372,7 @@ namespace PortfolioPal
         public Asset GetTradedAssetDB(string symbol){
             return _conn.QuerySingle<Asset>($"SELECT * FROM tradedassets where symbol = '{symbol}';");
         }
-  
+        // need to update this to match current traded assets DB - you added all asset parameters. update everywhere!!! please and thank you
         public void AddTradedAssetToDB(Asset asset)
         {
             asset.priceBaseline = (asset.priceBaseline == 0) ? (asset.price != 0) ? asset.price : 0 : asset.priceBaseline; 
@@ -297,7 +394,6 @@ namespace PortfolioPal
                 TotalPLP = asset.TotalPLP, TotalPLD = asset.TotalPLD, performance = asset.performance 
             });
         }
-        // maybe do common stts update here. to update stock/asset plp and perf - we can do it all the time whenever we want to update cool. 
   
         public void UpdateDailyStatsDB(Asset asset)
         {

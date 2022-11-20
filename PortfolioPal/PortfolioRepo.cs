@@ -9,6 +9,7 @@ using PortfolioPal.Models;
 using System.Data;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
+using System.Threading.Tasks;
 
 namespace PortfolioPal
 {
@@ -19,11 +20,10 @@ namespace PortfolioPal
         private string APCA_API_KEY = JObject.Parse(File.ReadAllText("keychain.json")).GetValue("alpaca_key").ToString();
         private string APCA_API_SECRET = JObject.Parse(File.ReadAllText("keychain.json")).GetValue("alpaca_secret").ToString();
         private string APCA_API_URL = JObject.Parse(File.ReadAllText("keychain.json")).GetValue("alpaca_url").ToString();
-
+        private string APCA_DATA_API_URL = JObject.Parse(File.ReadAllText("keychain.json")).GetValue("alpaca_data_url").ToString();
 
         private List<string> okPeriod = new List<string>() { "1D", "1W", "1M", "A" };
-        private List<string> okTimeframe = new List<string>() { "15Min", "1H", "1D", "1W" };
-
+        private List<string> okTimeframe = new List<string>() { "5Min", "10Min", "15Min", "1H", "1D", "1W" };
 
         public PortfolioRepo (IDbConnection conn)
         {
@@ -31,6 +31,11 @@ namespace PortfolioPal
             _clientBroker = new HttpClient();
             _clientBroker.DefaultRequestHeaders.Add("APCA-API-KEY-ID", APCA_API_KEY);
             _clientBroker.DefaultRequestHeaders.Add("APCA-API-SECRET-KEY", APCA_API_SECRET);    
+        }
+
+        public async Task<string> AwaitClientGetReponse(HttpClient client, string url)
+        {
+            return await client.GetStringAsync(url);   
         }
 
         public Portfolio GetAccount()
@@ -58,8 +63,6 @@ namespace PortfolioPal
             return p;
         }
         
-        
-
         public void GetAllPortfolioPositions(Portfolio p)
         {
             var positionsURL = $"{APCA_API_URL}/v2/positions";
@@ -68,7 +71,7 @@ namespace PortfolioPal
             for (int i = 0; i < positions.Length; i++)
             {
                 var asset            = new Asset();
-                asset.assetID        = JObject.Parse(positions[i].ToString()).GetValue("asset_id").ToString();
+                asset.assetID        = JObject.Parse(positions[i].ToString()).GetValue("assetID").ToString();
                 asset.symbol         = JObject.Parse(positions[i].ToString()).GetValue("symbol").ToString();
                 asset.exchange       = JObject.Parse(positions[i].ToString()).GetValue("exchange").ToString();
                 asset.assetClass     = JObject.Parse(positions[i].ToString()).GetValue("asset_class").ToString();
@@ -90,8 +93,6 @@ namespace PortfolioPal
                     p.cryptoPositions.Add(asset);
             }
         }
-
-
         
         public void UpdatePortfolioDiversity(Portfolio p)
         {
@@ -167,7 +168,30 @@ namespace PortfolioPal
 
         }
 
-
-
+        public MarketPerf GetMarketPerformance()
+        {
+            MarketPerf perf = new MarketPerf();
+            var assetURL = $"{APCA_DATA_API_URL}/v2/stocks/snapshots?symbols=SPY,DIA,IWM";
+            var assetResponse = AwaitClientGetReponse(_clientBroker, assetURL).Result;
+            var syms = JObject.Parse(assetResponse.ToString());
+            foreach (var a in syms)
+            {
+                var symsMinBar = JObject.Parse(syms[a.Key].ToString())["minuteBar"];
+                var symsLClose = JObject.Parse(syms[a.Key].ToString())["prevDailyBar"];
+                var price = Convert.ToDouble(JObject.Parse(symsMinBar.ToString()).GetValue("c"));
+                var lastPrice = Convert.ToDouble(JObject.Parse(symsLClose.ToString()).GetValue("c"));
+                var pcChangeToday = ((price - lastPrice) / lastPrice) * 100;
+                if (a.Key == "SPY"){
+                    perf.SNPPerf = pcChangeToday;
+                }
+                else if (a.Key == "DIA"){
+                    perf.DOWPerf = pcChangeToday;
+                }
+                else if (a.Key == "IWM"){
+                    perf.RussellPerf = pcChangeToday;
+                }
+            }
+            return perf;
+        }
     }
 }

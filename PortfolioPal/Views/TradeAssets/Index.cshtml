@@ -6,21 +6,17 @@
 @model IEnumerable<Asset>
 
 <h2>Trade Assets</h2>
-
 <div id="assets-actions">
-
-<ul>
-    <li><a class="testes" asp-area="" asp-controller="TradeAssets" asp-action="UpdateAssets">Update Trade Assets</a></li>
-    <li><a class="testes" asp-area="" asp-controller="TradeAssets" asp-action="Index">Reset Trade Assets</a></li>
-    <li><a class="testes" asp-area="" asp-controller="TradeAssets" asp-action="Index">Edit Trade Assets</a></li>
-</ul>
+    <ul>
+        <li><a class="testes" asp-area="" asp-controller="TradeAssets" asp-action="UpdateAssets">Update Trade Assets</a></li>
+        <li><a class="testes" asp-area="" asp-controller="TradeAssets" asp-action="Index">Reset Trade Assets</a></li>
+        <li><a class="testes" asp-area="" asp-controller="TradeAssets" asp-action="Index">Edit Trade Assets</a></li>
+    </ul>
 </div>
-
-
 <div id="active-assets-overview">
     <h3>All Traded Assets</h3>
     <section>
-        <table class="table table-striped responsive">
+        <table class="table table-scroll table-striped responsive">
             <tr>
                 <th>Symbol</th>
                 <th>Price</th>
@@ -49,7 +45,6 @@
             @foreach(var a in Model)
             {
                 <tr>
-                    
                     <td><a href=/TradeAssets/TradedAsset/@a.symbol>@a.symbol</a></td>
                     <td>@Math.Round(@a.price, 4)</td>
                     <td>@Math.Round(@a.qty, 6)</td>
@@ -64,8 +59,7 @@
                     <td>@Math.Round(@a.changeToday, 2)</td>
                     <td>@Math.Round(@a.TotalTraded, 2)</td>
                     <td>@a.NumberTrades</td>
-                    <td>@a.NumberBuys</td>
-                    <td>@a.NumberSells</td>
+                    <td>@a.NumberBuys/@a.NumberSells</td>
                     <td>@Math.Round(@a.TotalPLP, 4)</td>
                     <td>@Math.Round(@a.TotalPLD, 2)</td>
                     <td>@Math.Round(@a.assetPLP, 4)</td>

@@ -10,8 +10,8 @@ namespace PortfolioPal.ViewModels
         public int NumAllUpdatedAssets { get; set; }
         public int NumAllAvailableAssets { get; set; }
         public int NumAllFilteredAssets { get; set; }
-        public List<string> UserRequiredAssets { get; set; }
-        public List<string> UserOptionalAssets { get; set; }
+        public List<string> UserTradeAssets { get; set; }
+        public List<string> UserDividendAssets { get; set; }
         public IEnumerable<Potential> SuggestedTradeAssets { get; set; }
         public IEnumerable<Potential> SuggestedDividendAssets {get; set;}
     }

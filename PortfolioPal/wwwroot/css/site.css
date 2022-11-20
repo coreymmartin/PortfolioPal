@@ -24,6 +24,7 @@ a {
   border-color: #1861ac;
 }
 
+
 /* Sticky footer styles
 -------------------------------------------------- */
 html {
@@ -86,15 +87,46 @@ body {
 
 /* table scroll?
 -------------------------------------------------- */
-.table{
-  max-height: 10%;
+.table-scroll {
+  max-height: 380px;
   overflow-y: scroll;
   scroll-behavior: smooth;
   font-size: small;
+  width: 97.5%;
+  padding: 0.25%;
+  margin: 1%;
+  border-style: double;
 }
 
 th{
   font-weight: 500;
+}
+.table-tiny {
+  max-height: fit-content;
+  overflow-y: none;
+  font-size: smaller;
+  border-style: double;
+  width: 100%;
+  padding: 0.5%;
+  margin: 1%;
+}
+
+
+/* market performance
+-------------------------------------------------- */
+#market-performance {
+  text-align: center;
+  word-spacing: 50%;
+}
+
+h3 {
+  text-align:center;
+}
+h4 {
+  text-align:center;
+}
+h5 {
+  text-align:center;
 }
 
 

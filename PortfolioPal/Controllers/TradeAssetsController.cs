@@ -22,23 +22,12 @@ namespace PortfolioPal.Controllers
     {
         private readonly IAssetRepo assetRepo;
         private readonly IOrderRepo orderRepo;
-        //private readonly IPortfolioRepo portRepo;
 
-        //public TradeAssetsController(IAssetRepo repo)
-        //{
-        //    this.assetRepo = repo;
-        //}
-        //
-        //public TradeAssetsController(IOrderRepo repo)
-        //{
-        //    this.orderRepo = repo;
-        //}
 
-        public TradeAssetsController(IAssetRepo assetRepo, IOrderRepo orderRepo /*, IPortfolioRepo portRepo*/)
+        public TradeAssetsController(IAssetRepo assetRepo, IOrderRepo orderRepo)
         {
             this.assetRepo = assetRepo;
             this.orderRepo = orderRepo;
-            //this.portRepo = portRepo;
         }
 
 
@@ -48,18 +37,23 @@ namespace PortfolioPal.Controllers
         }
         public IActionResult TradedAsset(string symbol)
         {
-            TradeAssetVM assetVM = new TradeAssetVM();
-            assetVM.asset = assetRepo.GetTradedAssetDB(symbol);
-            assetVM.orders = orderRepo.ReadAssetOrders(symbol, 25);
+            TradeAssetVM assetVM = new TradeAssetVM
+            {
+                asset = assetRepo.GetTradedAssetDB(symbol),
+                orders = orderRepo.ReadAssetOrders(symbol, 25)
+            };
             var startDate = assetVM.orders.Min(x => x.filledAt);
             var startDateFmt = DateTime.Parse(startDate).ToString("yyyy-MM-dd'T'HH:mm:ss.fffzzz", DateTimeFormatInfo.InvariantInfo);
             var numDays = (DateTime.Today - DateTime.Parse(startDate.ToString())).TotalDays;
             int reqLimit = Convert.ToInt32(numDays) * 50;
             var assetEquity = assetRepo.GetAssetPriceHistory(symbol, reqLimit, startDateFmt, "15Min");
-            var orderDataRaw = orderRepo.ExtractOrderData(assetVM.orders.ToList());
-            var orderDataFit = orderRepo.ChartDataFiller(orderDataRaw, assetEquity);
+            var orderDataRaw_Buy = orderRepo.ExtractOrderData(assetVM.orders.ToList(), "buy");
+            var orderDataRaw_Sell = orderRepo.ExtractOrderData(assetVM.orders.ToList(), "sell");
+            var orderDataFit_Buy = orderRepo.ChartDataFiller(orderDataRaw_Buy, assetEquity);
+            var orderDataFit_Sell = orderRepo.ChartDataFiller(orderDataRaw_Sell, assetEquity);
             ViewBag.AssetEquity = JsonConvert.SerializeObject(assetEquity);
-            ViewBag.OrderDatas = JsonConvert.SerializeObject(orderDataFit);
+            ViewBag.OrderDatasBuy = JsonConvert.SerializeObject(orderDataFit_Buy);
+            ViewBag.OrderDatasSell = JsonConvert.SerializeObject(orderDataFit_Sell);
             return View(assetVM);
         }
 

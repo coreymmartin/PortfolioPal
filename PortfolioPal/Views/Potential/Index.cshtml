@@ -11,7 +11,7 @@
 </ul>
    
 <div id = "table-summaries">
-    <table class="table table-striped responsive">
+    <table class="table-tiny table-striped responsive">
         <tr>
             <th>Updated Assets</th>
             <th>User Selected Assets</th>
@@ -33,7 +33,7 @@
         <tr>
             <th>Preferred Assets</th>
         </tr>
-        foreach(var p in Model.UserRequiredAssets)
+        foreach(var p in Model.UserTradeAssets)
         {
             <tr>
                 <td>p</td>
@@ -44,7 +44,7 @@
         <tr>
             <th>Optional Assets</th>
         </tr>
-        foreach (var o in Model.UserOptionalAssets){
+        foreach (var o in Model.UserDividendAssets){
             <tr>
                 <td>o</td>
             </tr>
@@ -55,7 +55,7 @@
 
 <div id="Suggested Dividend Assets">
     <h3>Suggested Dividend Assets</h3>
-    <table class="table table-striped responsive" id="suggested-dividend-assets">
+    <table class="table table-scroll table-striped responsive" id="suggested-dividend-assets">
         <tr>
             <th>Score</th>
             <th>Symbol</th>

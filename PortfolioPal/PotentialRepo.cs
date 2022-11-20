@@ -34,8 +34,8 @@ namespace PortfolioPal
         public List<string> AllPotentialAssetsSymbols {get; set;}
         public List<Potential> FilteredPotentialAssets {get; set;}
         public List<Potential> SuggestedPotentialAssets {get; set;}
-        public List<string> UserSelectedAssetsRequired {get; set;}
-        public List<string> UserSelectedAssetsOptional {get; set;}
+        public List<string> UserSelectedAssetsTrade {get; set;}
+        public List<string> UserSelectedAssetsDividend {get; set;}
         public List<string> AllOptionalAssets {get; set;}
         public List<string> DividendAssets {get; set;}
 
@@ -46,10 +46,6 @@ namespace PortfolioPal
             _clientIEX = new HttpClient();
             _clientBroker.DefaultRequestHeaders.Add("APCA-API-KEY-ID", APCA_API_KEY);       // fix this its messy.
             _clientBroker.DefaultRequestHeaders.Add("APCA-API-SECRET-KEY", APCA_API_SECRET);
-
-            //var config = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json").Build();
-            //string connString = config.GetConnectionString("portfoliopal");
-            //_conn = new MySqlConnection(connString);
         }
     # endregion
 
@@ -118,8 +114,8 @@ namespace PortfolioPal
         public void GetUserSelectedAssets()
         {
             AssetRepo aRepo = new AssetRepo(_conn);
-            UserSelectedAssetsRequired = aRepo.GetUserSelectedRequiredDB();
-            UserSelectedAssetsOptional = aRepo.GetUserSelectedOptionalDB();
+            UserSelectedAssetsTrade = aRepo.GetUserSelectedTradeDB();
+            UserSelectedAssetsDividend = aRepo.GetUserSelectedDividendDB();
         }
 
         public void AddMorePotentials(bool CheckForUserSelected = true)
@@ -127,7 +123,7 @@ namespace PortfolioPal
             List<string> currentDBSymbols = new List<string>();
             List<string> toAddUserSelected = new List<string>();
             List<Potential> toAddPotentials = new List<Potential>();
-            if (UserSelectedAssetsRequired == null || UserSelectedAssetsOptional == null) {
+            if (UserSelectedAssetsTrade == null || UserSelectedAssetsDividend == null) {
                 GetUserSelectedAssets();
             }
             var dbPotentials = GetPotentialDB();
@@ -135,11 +131,11 @@ namespace PortfolioPal
                 currentDBSymbols.Add(d.symbol);
             } var curDBSymsArr = currentDBSymbols.ToArray();
             if (CheckForUserSelected) {
-                foreach (var r in UserSelectedAssetsRequired){
+                foreach (var r in UserSelectedAssetsTrade){
                     if (!currentDBSymbols.Contains(r))
                         toAddUserSelected.Add(r);
                 }
-                foreach (var o in UserSelectedAssetsOptional){
+                foreach (var o in UserSelectedAssetsDividend){
                     if (!currentDBSymbols.Contains(o)){
                         toAddUserSelected.Add(o);
                     }
@@ -209,9 +205,6 @@ namespace PortfolioPal
 
         public int GetSQLTableLength(string table)
         {
-           
-            //var checkTable = _conn.ExecuteScalar($"SHOW TABLES LIKE '{table}';");
-            //if (checkTable != null){
             if (_conn.ExecuteScalar($"SHOW TABLES LIKE '{table}';") != null){
                 return (int.TryParse(_conn.ExecuteScalar($"SELECT COUNT(*) FROM {table};").ToString(), out int len)) ? len : 0;
             } return 0; 
@@ -256,7 +249,7 @@ namespace PortfolioPal
         }
 
         public IEnumerable<Potential> QueryView(string view)
-        {   // probs change this to a switch case thing and have more control with tables/views. neat.
+        {
             List<string> acceptableViews = new List<string>()
             { "allfilteredpotentials", "updatedpotentials", "expiredpotentials",
                 "notupdatedpotentials", "notupdateduserselected", "toupdatepotentials",
@@ -269,7 +262,6 @@ namespace PortfolioPal
 
         public int GetStatsCredits()
         {
-            // do we need this http _clientIEX thing here? probs not. I hope not.
             var iexCreditsURL = $"{IEX_API_URL}/stable/account/metadata?token={IEX_API_SECRET}";
             try {
                 var iexCreditsResponse = AwaitClientGetReponse(_clientIEX, iexCreditsURL);
@@ -281,8 +273,6 @@ namespace PortfolioPal
 
         public void IEXStats(Potential asset)
         {
-            // hey it fucked up on an unknown symbol. it had a period. 
-            // so you include exclude period symbols in initial filtering of potentials. cool thanks. !!!
             // credits = 5
             var iexStatsURL = $"{IEX_API_URL}/stable/stock/{asset.symbol}/stats/?token={IEX_API_KEY}";
             var iexStatsResponse = AwaitClientGetReponse(_clientIEX, iexStatsURL);
@@ -477,7 +467,7 @@ namespace PortfolioPal
                 score += ((p.week52High - p.price) < (p.price - p.week52Low)) ? 1 : 0;
                 score += (p.day50MovingAvg > p.day200MovingAvg) ? 1 : -1;
                 score += (p.ttmDividendRate > 0) ? 1 : 0;
-                score += (0.03 <= p.dividendYield && p.dividendYield <= 0.10) ? 1 : (0.02 < p.dividendYield && p.dividendYield < 0.03 || 0.10 < p.dividendYield && p.dividendYield <= 0.15) ? 0.5 : 0;
+                score += (0.05 <= p.dividendYield && p.dividendYield <= 0.12) ? 1 + p.dividendYield : (0.02 < p.dividendYield && p.dividendYield < 0.03 || 0.12 < p.dividendYield && p.dividendYield <= 0.15) ? 0.5 * (1 + p.dividendYield) : 0;
                 score += (p.dividendFrequency > 3) ? 3 : (p.dividendFrequency > 0) ? p.dividendFrequency : 0 ;
                 score -= p.beta;
             }
@@ -504,8 +494,6 @@ namespace PortfolioPal
             }
             p.score = score;
         }
-
     #endregion
-
     }
 }
