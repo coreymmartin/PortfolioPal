@@ -33,10 +33,10 @@
                 <th>TotalTraded</th>
                 <th>TotalTrades</th>
                 <th>Buys/Sells</th>
-                <th>TotalPL(%)</th>
-                <th>TotalPL($)</th>
+                <th>PortPLTotal(%)</th>
+                <th>PortPLTotal($)</th>
                 <th>AssetPL(%)</th>
-                <th>Performance</th>
+                <th>PortPerf</th>
                 <th>PriceBaseline</th>
                 <th>Shortable</th>
                 <th>AssetClass</th>
@@ -51,19 +51,19 @@
                     <td>@a.side</td>
                     <td>@Math.Round(@a.market_value, 2)</td>
                     <td>@Math.Round(@a.avg_entry_price, 2)</td>
-                    <td>@Math.Round(@a.pl_dollars_total, 2)</td>
-                    <td>@Math.Round(@a.port_pl_total, 4)</td>
-                    <td>@Math.Round(@a.pl_dollars_today, 2)</td>
+                    <td>@Math.Round(@a.pl_dollars_current, 2)</td>
                     <td>@Math.Round(@a.port_pl_current, 4)</td>
+                    <td>@Math.Round(@a.pl_dollars_today, 2)</td>
+                    <td>@Math.Round(@a.port_pl_running, 4)</td>
                     <td>@Math.Round(@a.lastPrice, 2)</td>
                     <td>@Math.Round(@a.changeToday, 2)</td>
                     <td>@Math.Round(@a.amount_traded_total, 2)</td>
                     <td>@a.num_trades_total</td>
                     <td>@a.num_buys_total/@a.num_sells_total</td>
-                    <td>@Math.Round(@a.TotalPLP, 4)</td>
-                    <td>@Math.Round(@a.TotalPLD, 2)</td>
+                    <td>@Math.Round(@a.port_pl_total, 4)</td>
+                    <td>@Math.Round(@a.pl_dollars_total, 2)</td>
                     <td>@Math.Round(@a.asset_pl_total, 4)</td>
-                    <td>@Math.Round(@a.performance, 4)</td>
+                    <td>@Math.Round(@a.port_perf_per_total, 4)</td>
                     <td>@Math.Round(@a.start_price_total, 2)</td>
                     <td>@a.shortable</td>
                     <td>@a.asset_class</td>

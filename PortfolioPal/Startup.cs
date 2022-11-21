@@ -38,6 +38,7 @@ namespace PortfolioPal
             services.AddTransient<IOrderRepo, OrderRepo>();
             services.AddTransient<IAssetRepo, AssetRepo>();
             services.AddTransient<IPortfolioRepo, PortfolioRepo>();
+            services.AddTransient<IConfigRepo, ConfigRepo>();
             services.AddControllersWithViews();
         }
 

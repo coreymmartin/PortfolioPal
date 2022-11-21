@@ -305,12 +305,12 @@ namespace PortfolioPal
         {
             var buyAmount = Convert.ToDouble(_conn.ExecuteScalar($"SELECT SUM(filledQty * filledPrice) FROM orders WHERE symbol = '{asset.symbol}' and side = 'buy'"));
             var sellAmount = Convert.ToDouble(_conn.ExecuteScalar($"SELECT SUM(filledQty * filledPrice) FROM orders WHERE symbol = '{asset.symbol}' and side = 'sell'"));
-            asset.TotalPLD = buyAmount - sellAmount;
+            asset.port_pl_total = buyAmount - sellAmount;
         }
 
         public void UpdateAssetTotalPLP(Asset asset)
         {
-            asset.TotalPLP = (asset.TotalPLD / asset.amount_traded_total) * 100;
+            asset.port_pl_total = (asset.port_pl_total / asset.amount_traded_total) * 100;
         }
 
         public void GetAllTradedAssets()

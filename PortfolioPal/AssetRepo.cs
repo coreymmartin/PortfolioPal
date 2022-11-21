@@ -151,7 +151,7 @@ namespace PortfolioPal
                 asset.changeToday    = double.Parse(JObject.Parse(portfolio[i].ToString()).GetValue("change_today").ToString());
                 asset.start_price_total = (asset.start_price_total == 0) ? (asset.current_price != 0) ? asset.current_price : 0 : asset.start_price_total;
                 asset.asset_pl_total = (((asset.current_price / asset.start_price_total) - 1) * 100);
-                asset.port_perf_per_total = ((asset.TotalPLD / asset.amount_traded_total) * 100);
+                asset.port_perf_per_total = ((asset.pl_dollars_total / asset.amount_traded_total) * 100);
                 portfolioPositions.Add(asset.symbol);
                 UpdateDailyStatsDB(asset);
             }
@@ -374,22 +374,57 @@ namespace PortfolioPal
         public void AddTradedAssetToDB(Asset asset)
         {
             asset.start_price_total = (asset.start_price_total == 0) ? (asset.current_price != 0) ? asset.current_price : 0 : asset.start_price_total; 
-            _conn.Execute("INSERT INTO tradedassets (asset_id, symbol, exchange, asset_class, shortable, qty, side, market_value, avg_entry_price, " +
-                "pl_dollars_total, port_pl_total, pl_dollars_today, port_pl_running, current_price, lastPrice, changeToday, start_price_total, asset_pl_total, " +
-                "amount_traded_total, num_trades_total, num_buys_total, num_sells_total, TotalPLP, TotalPLD, port_perf_per_total) " + 
-                " VALUES (@asset_id, @symbol, @exchange, @asset_class, @shortable, @qty, @side, @market_value, @avg_entry_price, @pl_dollars_total, " +
-                "@port_pl_total, @pl_dollars_today, @port_pl_running, @current_price, @lastPrice, @changeToday, @start_price_total, @asset_pl_total, @amount_traded_total, " +
-                "@num_trades_total, @num_buys_total, @num_sells_total, @TotalPLP, @TotalPLD, @port_perf_per_total) " + 
+            _conn.Execute("INSERT INTO tradedassets (asset_id, symbol, exchange, asset_class, classification, tradable, shortable, side, qty, num_trades_current, " + 
+                    "num_trades_total, num_buys_current, num_sells_current, num_buys_total, num_sells_total, current_price, market_value, avg_entry_price, " +
+                    "hsl_limit_long, tsl_limit_long, tsl_enable_long, hsl_limit_short, tsl_limit_short, tsl_enable_short, hsl_trigger, tsl_trigger, allowance, " +
+                    "max_active_price, min_active_price, tradestamp, start_price_current, start_price_total, asset_max_price_current, asset_max_price_total, " +
+                    "asset_min_price_current, asset_min_price_total, asset_pl_current, asset_pl_total, port_pl_now, port_pl_running, port_pl_current, " +
+                    "port_pl_total, port_perf_per_current, port_perf_per_total, port_max_pl_current, port_max_pl_total, port_min_pl_current, port_min_pl_total, " +
+                    "pl_dollars_current, pl_dollars_total, amount_traded_current, amount_traded_total, roi_current, roi_total, hsl_signal, tsl_signal, " +
+                    "day_signal, hour_signal, 15Min_signal, master_signal, strategy_champ, strategy_day, strategy_hour, strategy_15Min, diversity_signal, " +
+                    "betty_day_period_long, betty_day_period_short, betty_hour_period_long, betty_hour_period_short, betty_15Min_period_long, " +
+                    "betty_15Min_period_short, mercy_day_slow, mercy_day_fast, mercy_day_smooth, mercy_hour_slow, mercy_hour_fast, mercy_hour_smooth, " +
+                    "mercy_15Min_slow, mercy_15Min_fast, mercy_15Min_smooth, polly_day_period, polly_day_future, polly_hour_period, polly_hour_future, " +
+                    "polly_15Min_period, polly_15Min_future, betty_opt_pl_day, betty_opt_pl_hour, betty_opt_pl_15Min, mercy_opt_pl_day, mercy_opt_pl_hour, " +
+                    "mercy_opt_pl_15Min, polly_opt_pl_day, polly_opt_pl_hour, polly_opt_pl_15Min, tsl_long_opt_pl, tsl_short_opt_pl, betty_optimized, " +
+                    "betty_optcomplete_day, betty_optcomplete_hour, betty_optcomplete_15Min, mercy_optimized, mercy_optcomplete_day, mercy_optcomplete_hour, " +
+                    "mercy_optcomplete_15Min, polly_optimized, polly_optcomplete_day, polly_optcomplete_hour, polly_optcomplete_15Min, tsl_long_optcomplete, " +
+                    "tsl_short_optcomplete, tsl_optimized, min_order_qty, inc_order_qty, status_check, updated, strategy_timestamp, created                ) " + 
+                " VALUES (@asset_id, @symbol, @exchange, @asset_class, @classification, @tradable, @shortable, @side, @qty, @num_trades_current, " + 
+                    "@num_trades_total, @num_buys_current, @num_sells_current, @num_buys_total, @num_sells_total, @current_price, @market_value, @avg_entry_price, " +
+                    "@hsl_limit_long, @tsl_limit_long, @tsl_enable_long, @hsl_limit_short, @tsl_limit_short, @tsl_enable_short, @hsl_trigger, @tsl_trigger, @allowance, " +
+                    "@max_active_price, @min_active_price, @tradestamp, @start_price_current, @start_price_total, @asset_max_price_current, @asset_max_price_total, " +
+                    "@asset_min_price_current, @asset_min_price_total, @asset_pl_current, @asset_pl_total, @port_pl_now, @port_pl_running, @port_pl_current, " +
+                    "@port_pl_total, @port_perf_per_current, @port_perf_per_total, @port_max_pl_current, @port_max_pl_total, @port_min_pl_current, @port_min_pl_total, " +
+                    "@pl_dollars_current, @pl_dollars_total, @amount_traded_current, @amount_traded_total, @roi_current, @roi_total, @hsl_signal, @tsl_signal, " +
+                    "@signal_day, @signal_hour, @signal_15Min, @master_signal, @strategy_champ, @strategy_day, @strategy_hour, @strategy_15Min, @diversity_signal, " +
+                    "@betty_day_period_long, @betty_day_period_short, @betty_hour_period_long, @betty_hour_period_short, @betty_15Min_period_long, " +
+                    "@betty_15Min_period_short, @mercy_day_slow, @mercy_day_fast, @mercy_day_smooth, @mercy_hour_slow, @mercy_hour_fast, @mercy_hour_smooth, " +
+                    "@mercy_15Min_slow, @mercy_15Min_fast, @mercy_15Min_smooth, @polly_day_period, @polly_day_future, @polly_hour_period, @polly_hour_future, " +
+                    "@polly_15Min_period, @polly_15Min_future, @betty_opt_pl_day, @betty_opt_pl_hour, @betty_opt_pl_15Min, @mercy_opt_pl_day, @mercy_opt_pl_hour, " +
+                    "@mercy_opt_pl_15Min, @polly_opt_pl_day, @polly_opt_pl_hour, @polly_opt_pl_15Min, @tsl_long_opt_pl, @tsl_short_opt_pl, @betty_optimized, " +
+                    "@betty_optcomplete_day, @betty_optcomplete_hour, @betty_optcomplete_15Min, @mercy_optimized, @mercy_optcomplete_day, @mercy_optcomplete_hour, " +
+                    "@mercy_optcomplete_15Min, @polly_optimized, @polly_optcomplete_day, @polly_optcomplete_hour, @polly_optcomplete_15Min, @tsl_long_optcomplete, " +
+                    "@tsl_short_optcomplete, @tsl_optimized, @min_order_qty, @inc_order_qty, @status_check, @updated, @strategy_timestamp, @created                ) " + 
                 " ON DUPLICATE KEY UPDATE asset_id = asset_id;",
             new
             {
-                assetID = asset.asset_id, symbol = asset.symbol, exchange = asset.exchange, assetClass = asset.asset_class, 
-                shortable = asset.shortable, qty = asset.qty, side = asset.side, marketValue = asset.market_value, costBasis = asset.avg_entry_price, 
-                plDollarsTotal = asset.pl_dollars_total, plPercentTotal = asset.port_pl_total, plDollarsToday = asset.pl_dollars_today, 
-                plPercentToday = asset.port_pl_running, price = asset.current_price, lastPrice = asset.lastPrice, changeToday = asset.changeToday, 
-                priceBaseline = asset.start_price_total, asset_pl_total = asset.asset_pl_total, TotalTraded = asset.amount_traded_total, 
-                NumberTrades = asset.num_trades_total, NumberBuys = asset.num_buys_total, NumberSells = asset.num_sells_total, 
-                TotalPLP = asset.TotalPLP, TotalPLD = asset.TotalPLD, port_perf_per_total = asset.port_perf_per_total 
+                asset_id= asset.asset_id, symbol= asset.symbol, exchange= asset.exchange, asset_class= asset.asset_class, classification= asset.classification, tradable= asset.tradable, shortable= asset.shortable, side= asset.side, qty= asset.qty, num_trades_current= asset.num_trades_current,
+                num_trades_total= asset.num_trades_total, num_buys_current= asset.num_buys_current, num_sells_current= asset.num_sells_current, num_buys_total= asset.num_buys_total, num_sells_total= asset.num_sells_total, current_price= asset.current_price, market_value= asset.market_value, avg_entry_price= asset.avg_entry_price,
+                hsl_limit_long= asset.hsl_limit_long, tsl_limit_long= asset.tsl_limit_long, tsl_enable_long= asset.tsl_enable_long, hsl_limit_short= asset.hsl_limit_short, tsl_limit_short= asset.tsl_limit_short, tsl_enable_short= asset.tsl_enable_short, hsl_trigger= asset.hsl_trigger, tsl_trigger= asset.tsl_trigger, allowance= asset.allowance,
+                max_active_price= asset.max_active_price, min_active_price= asset.min_active_price, tradestamp= asset.tradestamp, start_price_current= asset.start_price_current, start_price_total= asset.start_price_total, asset_max_price_current= asset.asset_max_price_current, asset_max_price_total= asset.asset_max_price_total,
+                asset_min_price_current= asset.asset_min_price_current, asset_min_price_total= asset.asset_min_price_total, asset_pl_current= asset.asset_pl_current, asset_pl_total= asset.asset_pl_total, port_pl_now= asset.port_pl_now, port_pl_running= asset.port_pl_running, port_pl_current= asset.port_pl_current,
+                port_pl_total= asset.port_pl_total, port_perf_per_current= asset.port_perf_per_current, port_perf_per_total= asset.port_perf_per_total, port_max_pl_current= asset.port_max_pl_current, port_max_pl_total= asset.port_max_pl_total, port_min_pl_current= asset.port_min_pl_current, port_min_pl_total= asset.port_min_pl_total,
+                pl_dollars_current= asset.pl_dollars_current, pl_dollars_total= asset.pl_dollars_total, amount_traded_current= asset.amount_traded_current, amount_traded_total= asset.amount_traded_total, roi_current= asset.roi_current, roi_total= asset.roi_total, hsl_signal= asset.hsl_signal, tsl_signal= asset.tsl_signal,
+                day_signal= asset.signal_day, hour_signal= asset.signal_hour, signal_15Min= asset.signal_15Min, master_signal= asset.master_signal, strategy_champ= asset.strategy_champ, strategy_day= asset.strategy_day, strategy_hour= asset.strategy_hour, strategy_15Min= asset.strategy_15Min, diversity_signal= asset.diversity_signal,
+                betty_day_period_long= asset.betty_day_period_long, betty_day_period_short= asset.betty_day_period_short, betty_hour_period_long= asset.betty_hour_period_long, betty_hour_period_short= asset.betty_hour_period_short, betty_15Min_period_long= asset.betty_15Min_period_long,
+                betty_15Min_period_short= asset.betty_15Min_period_short, mercy_day_slow= asset.mercy_day_slow, mercy_day_fast= asset.mercy_day_fast, mercy_day_smooth= asset.mercy_day_smooth, mercy_hour_slow= asset.mercy_hour_slow, mercy_hour_fast= asset.mercy_hour_fast, mercy_hour_smooth= asset.mercy_hour_smooth,
+                mercy_15Min_slow= asset.mercy_15Min_slow, mercy_15Min_fast= asset.mercy_15Min_fast, mercy_15Min_smooth= asset.mercy_15Min_smooth, polly_day_period= asset.polly_day_period, polly_day_future= asset.polly_day_future, polly_hour_period= asset.polly_hour_period, polly_hour_future= asset.polly_hour_future,
+                polly_15Min_period= asset.polly_15Min_period, polly_15Min_future= asset.polly_15Min_future, betty_opt_pl_day= asset.betty_opt_pl_day, betty_opt_pl_hour= asset.betty_opt_pl_hour, betty_opt_pl_15Min= asset.betty_opt_pl_15Min, mercy_opt_pl_day= asset.mercy_opt_pl_day, mercy_opt_pl_hour= asset.mercy_opt_pl_hour,
+                mercy_opt_pl_15Min= asset.mercy_opt_pl_15Min, polly_opt_pl_day= asset.polly_opt_pl_day, polly_opt_pl_hour= asset.polly_opt_pl_hour, polly_opt_pl_15Min= asset.polly_opt_pl_15Min, tsl_long_opt_pl= asset.tsl_long_opt_pl, tsl_short_opt_pl= asset.tsl_short_opt_pl, betty_optimized= asset.betty_optimized,
+                betty_optcomplete_day= asset.betty_optcomplete_day, betty_optcomplete_hour= asset.betty_optcomplete_hour, betty_optcomplete_15Min= asset.betty_optcomplete_15Min, mercy_optimized= asset.mercy_optimized, mercy_optcomplete_day= asset.mercy_optcomplete_day, mercy_optcomplete_hour= asset.mercy_optcomplete_hour,
+                mercy_optcomplete_15Min= asset.mercy_optcomplete_15Min, polly_optimized= asset.polly_optimized, polly_optcomplete_day= asset.polly_optcomplete_day, polly_optcomplete_hour= asset.polly_optcomplete_hour, polly_optcomplete_15Min= asset.polly_optcomplete_15Min, tsl_long_optcomplete= asset.tsl_long_optcomplete,
+                tsl_short_optcomplete= asset.tsl_short_optcomplete, tsl_optimized= asset.tsl_optimized, min_order_qty= asset.min_order_qty, inc_order_qty= asset.inc_order_qty, status_check= asset.status_check, updated= asset.updated, strategy_timestamp= asset.strategy_timestamp, created= asset.created
             });
         }
   
@@ -422,7 +457,7 @@ namespace PortfolioPal
                 "num_sells_total = @num_sells_total, TotalPLP = @TotalPLP, TotalPLD = @TotalPLD " +
                 "WHERE symbol = @symbol", 
                 new { TotalTraded = asset.amount_traded_total, NumberTrades = asset.num_trades_total, NumberBuys = asset.num_buys_total, 
-                    NumberSells = asset.num_sells_total, TotalPLP = asset.TotalPLP, TotalPLD = asset.TotalPLD, symbol = asset.symbol });
+                    NumberSells = asset.num_sells_total, TotalPLP = asset.port_pl_total, TotalPLD = asset.pl_dollars_total, symbol = asset.symbol });
         }
 
         public void UpdateAllAssetStatsDB(Asset asset)
@@ -452,8 +487,8 @@ namespace PortfolioPal
                     NumberTrades = asset.num_trades_total,
                     NumberBuys = asset.num_buys_total,
                     NumberSells = asset.num_sells_total,
-                    TotalPLP = asset.TotalPLP,
-                    TotalPLD = asset.TotalPLD,
+                    TotalPLP = asset.port_pl_total,
+                    TotalPLD = asset.pl_dollars_total,
                     port_perf_per_total = asset.port_perf_per_total,
                     assetID = asset.asset_id
                 });

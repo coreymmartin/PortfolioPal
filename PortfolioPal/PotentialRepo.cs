@@ -111,7 +111,7 @@ namespace PortfolioPal
             }
         }
 
-        public void GetUserSelectedAssets()
+        public void GetUserSelectedAssetsDB()
         {
             AssetRepo aRepo = new AssetRepo(_conn);
             UserSelectedAssetsTrade = aRepo.GetUserSelectedTradeDB();
@@ -124,7 +124,7 @@ namespace PortfolioPal
             List<string> toAddUserSelected = new List<string>();
             List<Potential> toAddPotentials = new List<Potential>();
             if (UserSelectedAssetsTrade == null || UserSelectedAssetsDividend == null) {
-                GetUserSelectedAssets();
+                GetUserSelectedAssetsDB();
             }
             var dbPotentials = GetPotentialDB();
             foreach (var d in dbPotentials){
@@ -215,10 +215,10 @@ namespace PortfolioPal
             // time to create views - split these into separate functions later please.
             // filtered assets (all assets from NASDAQ exchange and US_EQUITY asset_class)
             _conn.Execute("CREATE OR REPLACE VIEW `allfilteredpotentials` AS SELECT potentials.* FROM potentials " +
-            "WHERE potentials.exchange = 'NASDAQ' OR potentials.exchange = 'NYSE' AND potentials.asset_class = 'us_equity';");
+            "WHERE potentials.exchange = 'NASDAQ' OR potentials.exchange = 'NYSE' AND potentials.assetClass = 'us_equity';");
             // updated assets (all assets from filtered, which are updated)
             _conn.Execute("CREATE OR REPLACE VIEW `updatedpotentials` AS SELECT allfilteredpotentials.* FROM allfilteredpotentials " +
-            "WHERE allfilteredpotentials.current_price > 0 AND DATE(allfilteredpotentials.updated) > 0 ORDER BY updated DESC;");
+            "WHERE allfilteredpotentials.price > 0 AND DATE(allfilteredpotentials.updated) > 0 ORDER BY updated DESC;");
             // expired assets (all assets from filtered, which are updated but past expiration)
             _conn.Execute("CREATE OR REPLACE VIEW `expiredpotentials` AS SELECT updatedpotentials.* FROM updatedpotentials " + 
             "WHERE DATE(updatedpotentials.updated) > 0 AND DATE(updatedpotentials.updated) <= CURDATE() -  INTERVAL 30 DAY;");

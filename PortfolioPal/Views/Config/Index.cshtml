@@ -1,0 +1,69 @@
+﻿@model PortfolioPal.ViewModels.ConfigVM
+@{
+
+}
+<!DOCTYPE HTML>
+<head>
+
+</head>
+<body>
+    <div class="container">
+        <div class="row-mine">
+            <div class="column-mine">
+                <h1>Configuration</h1>
+                <div class="user-selected-assets-container">
+                    <h2>Selected Stock Assets</h2>
+                    <div class="user-selected-assets-subgroup" id="user-selected-stocks">
+                        <table class="user-selected-stocks table table-striped responsive">
+                            <tr><th>Stock Symbol</th></tr>
+                            @foreach (var asset in Model.userSelectedStocks){
+                                <tr><td>@asset</td></tr>
+                            }
+                        </table>
+                    </div>
+                    <h2>Selected Dividend Assets</h2>
+                    <div class="user-selected-assets-subgroup" id="user-selected-dividends">
+                        <table class="user-selected-stocks table table-striped responsive">
+                            <tr><th>Dividend Symbol</th></tr>
+                            @foreach (var asset in Model.userSelectedDividends){
+                                <tr><td>@asset</td></tr>
+                            }
+                        </table>
+                    </div>
+                    <h2>Selected Coin Assets</h2>
+                    <div class="user-selected-assets-subgroup" id="user-selected-coins">
+                        <table class="user-selected-stocks table table-striped responsive">
+                            <tr><th>Coin Symbol</th></tr>
+                            @foreach (var asset in Model.userSelectedCoins){
+                                <tr><td>@asset</td></tr>
+                            }
+                        </table>
+                    </div>
+                </div>
+                <div class="row-mine">
+                    <div class="column-mine">
+                        <input type="button" name="btn-edit-selected-assets" title="Edit Selected Assets" Hello>
+                    </div>
+                </div>
+            </div>
+            <div class="column-mine">
+                <div class="configuration-container">
+                    <h2>Trade Parameters</h2>
+                    <div class="configuration-subgroup" id="trade-config-parameters">
+                    </div>
+                    <h2>Account Parameters</h2>
+                    <div class="configuration-subgroup" id="account-config-parameters">
+                    </div>
+                    <h2>Optimizer Parameters</h2>
+                    <div class="configuration-subgroup" id="optimizer-config-parameters">
+                    </div>
+                </div>
+                <div class="row-mine">
+                    <div class="column-mine">
+                        <input type="button" name="btn-edit-parameters" title="Edit Parameters">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>

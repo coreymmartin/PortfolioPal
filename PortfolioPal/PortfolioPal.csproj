@@ -5,13 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Views\Config\**" />
     <Compile Remove="Views\Portfolio\**" />
-    <Content Remove="Views\Config\**" />
     <Content Remove="Views\Portfolio\**" />
-    <EmbeddedResource Remove="Views\Config\**" />
     <EmbeddedResource Remove="Views\Portfolio\**" />
-    <None Remove="Views\Config\**" />
     <None Remove="Views\Portfolio\**" />
   </ItemGroup>
 

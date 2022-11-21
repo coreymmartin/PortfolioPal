@@ -81,11 +81,11 @@
             </tr>
             <tr>
                 <td>@Model.asset.symbol</td>
-                <td>@Math.Round(Model.asset.TotalPLP, 4)</td>
-                <td>@Math.Round(Model.asset.TotalPLD, 2)</td>
-                <td>@Math.Round(Model.asset.pl_dollars_today, 2)</td>
+                <td>@Math.Round(Model.asset.port_pl_total, 4)</td>
                 <td>@Math.Round(Model.asset.pl_dollars_total, 2)</td>
-                <td>@Math.Round(Model.asset.port_pl_current, 4)</td>
+                <td>@Math.Round(Model.asset.pl_dollars_today, 2)</td>
+                <td>@Math.Round(Model.asset.pl_dollars_current, 2)</td>
+                <td>@Math.Round(Model.asset.port_pl_running, 4)</td>
                 <td>@Math.Round(Model.asset.port_pl_total, 4)</td>
                 <td>@Math.Round(Model.asset.amount_traded_total, 2)</td>
                 <td>@Model.asset.num_trades_total</td>
