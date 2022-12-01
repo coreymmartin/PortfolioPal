@@ -42,25 +42,119 @@
                 </div>
                 <div class="row-mine">
                     <div class="column-mine">
-                        <input type="button" name="btn-edit-selected-assets" title="Edit Selected Assets" Hello>
+                        <input type="button" name="btn-edit-selected-stocks" title="Edit Selected Stocks Assets" value="Edit Stocks">
+                        <input type="button" name="btn-edit-selected-dividends" title="Edit Selected Dividend Assets" value="Edit Dividend">
+                        <input type="button" name="btn-edit-selected-coins" title="Edit Selected Coin Assets" value="Edit Coin">
                     </div>
                 </div>
             </div>
             <div class="column-mine">
                 <div class="configuration-container">
-                    <h2>Trade Parameters</h2>
+                    <h2>Account/Trade Parameters</h2>
                     <div class="configuration-subgroup" id="trade-config-parameters">
-                    </div>
-                    <h2>Account Parameters</h2>
-                    <div class="configuration-subgroup" id="account-config-parameters">
+                        <table class="account-trade-parameters table table-striped responsive">
+                            <tr><th>bAllowBuyNHold</th><td>@Model.accountConfig.bAllowBuyNHold</td></tr>
+                            <tr><th>bAllowDayTrade</th><td>@Model.accountConfig.bAllowDayTrade</td></tr>
+                            <tr><th>bAllowShortOrder</th><td>@Model.accountConfig.bAllowShortOrder</td></tr>
+                            <tr><th>bCloseNOptimized</th><td>@Model.accountConfig.bCloseNOptimized</td></tr>
+                            <tr><th>bDoubleCheckStrats</th><td>@Model.accountConfig.bDoubleCheckStrats</td></tr>
+                            <tr><th>bIgnoreFirst15Min</th><td>@Model.accountConfig.bIgnoreFirst15Min</td></tr>
+                            <tr><th>bDontPlaceOrders</th><td>@Model.accountConfig.bDontPlaceOrders</td></tr>
+                            <tr><th>bKillOnOpen</th><td>@Model.accountConfig.bKillOnOpen</td></tr>
+                            <tr><th>bMarketCloseTSL</th><td>@Model.accountConfig.bMarketCloseTSL</td></tr>
+                            <tr><th>bOvernightShorts</th><td>@Model.accountConfig.bOvernightShorts</td></tr>
+                            <tr><th>bPaperTrade</th><td>@Model.accountConfig.bPaperTrade</td></tr>
+                            <tr><th>bPreMarketTrade</th><td>@Model.accountConfig.bPreMarketTrade</td></tr>
+                            <tr><th>bPostMarketTrade</th><td>@Model.accountConfig.bPostMarketTrade</td></tr>
+                            <tr><th>bResetParameters</th><td>@Model.accountConfig.bResetParameters</td></tr>
+                            <tr><th>bStrictDiversity</th><td>@Model.accountConfig.bStrictDiversity</td></tr>
+                            <tr><th>bTradeOnAvoid</th><td>@Model.accountConfig.bTradeOnAvoid</td></tr>
+                            <tr><th>bTradeNOptimized</th><td>@Model.accountConfig.bTradeNOptimized</td></tr>
+                            <tr><th>bUse_HardSL</th><td>@Model.accountConfig.bUse_HardSL</td></tr>
+                            <tr><th>bUse_TrailSL</th><td>@Model.accountConfig.bUse_TrailSL</td></tr>
+                            <tr><th>bUseChampStrat</th><td>@Model.accountConfig.bUseChampStrat</td></tr>
+                            <tr><th>bReaffirmTSLStrategy</th><td>@Model.accountConfig.bReaffirmTSLStrategy</td></tr>
+                            <tr><th>bRefreshTradeSignals</th><td>@Model.accountConfig.bRefreshTradeSignals</td></tr>
+                            <tr><th>iDayTradeMinimum</th><td>@Model.accountConfig.iDayTradeMinimum</td></tr>
+                            <tr><th>iOrderFillWaitTime</th><td>@Model.accountConfig.iOrderFillWaitTime</td></tr>
+                            <tr><th>iShortMinimum</th><td>@Model.accountConfig.iShortMinimum</td></tr>
+                            <tr><th>rAssetEquityPercent</th><td>@Model.accountConfig.rAssetEquityPercent</td></tr>
+                            <tr><th>rBetty_Min_Can2Can</th><td>@Model.accountConfig.rBetty_Min_Can2Can</td></tr>
+                            <tr><th>rBetty_Min_dCan</th><td>@Model.accountConfig.rBetty_Min_dCan</td></tr>
+                            <tr><th>rDiversity_Tolerance</th><td>@Model.accountConfig.rDiversity_Tolerance</td></tr>
+                            <tr><th>rStock_Diversity</th><td>@Model.accountConfig.rStock_Diversity</td></tr>
+                            <tr><th>rCoin_Diversity</th><td>@Model.accountConfig.rCoin_Diversity</td></tr>
+                            <tr><th>rDividend_Diversity</th><td>@Model.accountConfig.rDividend_Diversity</td></tr>
+                            <tr><th>rEODPercentShares</th><td>@Model.accountConfig.rEODPercentShares</td></tr>
+                            <tr><th>rEOD_TrailSL</th><td>@Model.accountConfig.rEOD_TrailSL</td></tr>
+                            <tr><th>rInitialBalance</th><td>@Model.accountConfig.rInitialBalance</td></tr>
+                            <tr><th>rPolly_Confidence_3</th><td>@Model.accountConfig.rPolly_Confidence_3</td></tr>
+                            <tr><th>rPolly_Confidence_2</th><td>@Model.accountConfig.rPolly_Confidence_2</td></tr>
+                            <tr><th>rPolly_Confidence_1</th><td>@Model.accountConfig.rPolly_Confidence_1</td></tr>
+                            <tr><th>rPolly_Limiter</th><td>@Model.accountConfig.rPolly_Limiter</td></tr>
+                            <tr><th>rRecoveryPercent</th><td>@Model.accountConfig.rRecoveryPercent</td></tr>
+                            <tr><th>rRecoveryReset_HSL</th><td>@Model.accountConfig.rRecoveryReset_HSL</td></tr>
+                            <tr><th>rRecoveryReset_TSL</th><td>@Model.accountConfig.rRecoveryReset_TSL</td></tr>
+                            <tr><th>rLimitOrderAdjustment</th><td>@Model.accountConfig.rLimitOrderAdjustment</td></tr>
+                            <tr><th>rMinAssetAllowance</th><td>@Model.accountConfig.rMinAssetAllowance</td></tr>
+                            <tr><th>rPercentToShort</th><td>@Model.accountConfig.rPercentToShort</td></tr>
+                            <tr><th>rStatusUpdateRefresh</th><td>@Model.accountConfig.rStatusUpdateRefresh</td></tr>
+                            <tr><th>sMarketOrderForce</th><td>@Model.accountConfig.sMarketOrderForce</td></tr>
+                            <tr><th>sOHLC</th><td>@Model.accountConfig.sOHLC</td></tr> 
+                        </table>
                     </div>
                     <h2>Optimizer Parameters</h2>
                     <div class="configuration-subgroup" id="optimizer-config-parameters">
+                        <table class="optimizer-parameters table table-striped responsive">
+                            <tr><th>bOptimizeBettyDay</th><td>@Model.accountConfig.bOptimizeBettyDay</td></tr>
+                            <tr><th>bOptimizeBettyHour</th><td>@Model.accountConfig.bOptimizeBettyHour</td></tr>
+                            <tr><th>bOptimizeBetty15Min</th><td>@Model.accountConfig.bOptimizeBetty15Min</td></tr>
+                            <tr><th>bOptimizeMercyDay</th><td>@Model.accountConfig.bOptimizeMercyDay</td></tr>
+                            <tr><th>bOptimizeMercyHour</th><td>@Model.accountConfig.bOptimizeMercyHour</td></tr>
+                            <tr><th>bOptimizeMercy15Min</th><td>@Model.accountConfig.bOptimizeMercy15Min</td></tr>
+                            <tr><th>bOptimizePollyDay</th><td>@Model.accountConfig.bOptimizePollyDay</td></tr>
+                            <tr><th>bOptimizePollyHour</th><td>@Model.accountConfig.bOptimizePollyHour</td></tr>
+                            <tr><th>bOptimizePolly15Min</th><td>@Model.accountConfig.bOptimizePolly15Min</td></tr>
+                            <tr><th>bOptimizeTSL</th><td>@Model.accountConfig.bOptimizeTSL</td></tr>
+                            <tr><th>bSavePlots</th><td>@Model.accountConfig.bSavePlots</td></tr>
+                            <tr><th>rInitialBalance_Opt</th><td>@Model.accountConfig.rInitialBalance_Opt</td></tr>
+                            <tr><th>iMaxAssetsToOptimize</th><td>@Model.accountConfig.iMaxAssetsToOptimize</td></tr>
+                            <tr><th>iMaxStocksToOptimize</th><td>@Model.accountConfig.iMaxStocksToOptimize</td></tr>
+                            <tr><th>iMaxCoinsToOptimize</th><td>@Model.accountConfig.iMaxCoinsToOptimize</td></tr>
+                            <tr><th>iOptimizeStepsLong</th><td>@Model.accountConfig.iOptimizeStepsLong</td></tr>
+                            <tr><th>iOptimizeStepsShort</th><td>@Model.accountConfig.iOptimizeStepsShort</td></tr>
+                            <tr><th>iOptimizeStepsFast</th><td>@Model.accountConfig.iOptimizeStepsFast</td></tr>
+                            <tr><th>iOptimizeStepsSlow</th><td>@Model.accountConfig.iOptimizeStepsSlow</td></tr>
+                            <tr><th>iOptimizeStepsSig</th><td>@Model.accountConfig.iOptimizeStepsSig</td></tr>
+                            <tr><th>iOptimizeStepsFuture</th><td>@Model.accountConfig.iOptimizeStepsFuture</td></tr>
+                            <tr><th>iOptCandles_Limit</th><td>@Model.accountConfig.iOptCandles_Limit</td></tr>
+                            <tr><th>iOptCandles_day</th><td>@Model.accountConfig.iOptCandles_day</td></tr>
+                            <tr><th>iOptCandles_hour</th><td>@Model.accountConfig.iOptCandles_hour</td></tr>
+                            <tr><th>iOptCandles_15Min</th><td>@Model.accountConfig.iOptCandles_15Min</td></tr>
+                            <tr><th>iOptCandles_TSL</th><td>@Model.accountConfig.iOptCandles_TSL</td></tr>
+                            <tr><th>rOptExpiration</th><td>@Model.accountConfig.rOptExpiration</td></tr>
+                            <tr><th>rOptTooFresh</th><td>@Model.accountConfig.rOptTooFresh</td></tr>
+                            <tr><th>rOptimizePortLimit</th><td>@Model.accountConfig.rOptimizePortLimit</td></tr>
+                            <tr><th>rOptimizePerfLimit</th><td>@Model.accountConfig.rOptimizePerfLimit</td></tr>
+                            <tr><th>rHSL_Limit_Lower</th><td>@Model.accountConfig.rHSL_Limit_Lower</td></tr>
+                            <tr><th>rHSL_Limit_Upper</th><td>@Model.accountConfig.rHSL_Limit_Upper</td></tr>
+                            <tr><th>rTSL_Enable_Lower</th><td>@Model.accountConfig.rTSL_Enable_Lower</td></tr>
+                            <tr><th>rTSL_Enable_Upper</th><td>@Model.accountConfig.rTSL_Enable_Upper</td></tr>
+                            <tr><th>rTSL_Limit_Lower</th><td>@Model.accountConfig.rTSL_Limit_Lower</td></tr>
+                            <tr><th>rTSL_Limit_Upper</th><td>@Model.accountConfig.rTSL_Limit_Upper</td></tr>
+                            <tr><th>rHSL_Opt_Steps</th><td>@Model.accountConfig.rHSL_Opt_Steps</td></tr>
+                            <tr><th>rTSL_Opt_Steps</th><td>@Model.accountConfig.rTSL_Opt_Steps</td></tr>
+                            <tr><th>rMinOptPLAllow_day</th><td>@Model.accountConfig.rMinOptPLAllow_day</td></tr>
+                            <tr><th>rMinOptPLAllow_hour</th><td>@Model.accountConfig.rMinOptPLAllow_hour</td></tr>
+                            <tr><th>rMinOptPLAllow_15Min</th><td>@Model.accountConfig.rMinOptPLAllow_15Min</td></tr>
+                            <tr><th>rMinOptPLAllow_TSL</th><td>@Model.accountConfig.rMinOptPLAllow_TSL</td></tr>
+                        </table>
                     </div>
                 </div>
                 <div class="row-mine">
                     <div class="column-mine">
-                        <input type="button" name="btn-edit-parameters" title="Edit Parameters">
+                        <input type="button" name="btn-edit-parameters" title="Edit Parameters" value="Edit Parameters">
+                        <input type="button" name="btn-reset-parameters" title="Reset Parameters" value="Reset Parameters">
                     </div>
                 </div>
             </div>

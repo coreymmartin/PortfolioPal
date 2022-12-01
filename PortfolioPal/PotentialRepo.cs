@@ -236,7 +236,7 @@ namespace PortfolioPal
             "LIMIT 75;");
             // suggested assets - top scoring boys.
             _conn.Execute("CREATE OR REPLACE VIEW `allsuggestedassets` AS SELECT allfilteredpotentials.* FROM allfilteredpotentials " +
-            "LEFT JOIN expiredpotentials ON allfilteredpotentials.asset_id = expiredpotentials.asset_id " +
+            "LEFT JOIN expiredpotentials ON allfilteredpotentials.assetID = expiredpotentials.assetID " +
             "WHERE allfilteredpotentials.SCORE > 0 ORDER BY allfilteredpotentials.SCORE DESC LIMIT 100;");
             // suggested assets (dividends - filtered and updated dividend assets with highest scores)
             // do dividend first then we can dump the rest to the suggested trade you lazy boy :)
@@ -244,8 +244,8 @@ namespace PortfolioPal
             "WHERE dividendYield > 0 ORDER BY allsuggestedassets.SCORE DESC LIMIT 10;");
             // suggested assets (trade - filtered and updated trade assets with highest scores (ignores scores from dividends))
             _conn.Execute("CREATE OR REPLACE VIEW `suggestedtradeassets` AS SELECT allsuggestedassets.* FROM allsuggestedassets " +
-            "LEFT JOIN suggesteddividendassets ON allsuggestedassets.asset_id = suggesteddividendassets.asset_id " +
-            "WHERE suggesteddividendassets.asset_id IS NULL;");
+            "LEFT JOIN suggesteddividendassets ON allsuggestedassets.assetID = suggesteddividendassets.assetID " +
+            "WHERE suggesteddividendassets.assetID IS NULL;");
         }
 
         public IEnumerable<Potential> QueryView(string view)
@@ -337,7 +337,7 @@ namespace PortfolioPal
         
         public Potential GetPotentialDB(Potential potential)
         {
-            return _conn.QuerySingle<Potential>("SELECT * FROM POTENTIALS WHERE asset_id = @potential.asset_id", 
+            return _conn.QuerySingle<Potential>("SELECT * FROM POTENTIALS WHERE assetID = @potential.assetID", 
                 new {assetID = potential.assetID});
         }
 
@@ -348,11 +348,11 @@ namespace PortfolioPal
                 "EXDIVIDENDDATE, DIVIDENDFREQUENCY, PERATIO, BETA, MAXCHANGEPERCENT, YEAR5CHANGEPERCENT, YEAR2CHANGEPERCENT, YEAR1CHANGEPERCENT, " +
                 "YTDCHANGEPERCENT, MONTH6CHANGEPERCENT, MONTH3CHANGEPERCENT, MONTH1CHANGEPERCENT, DAY30CHANGEPERCENT, DAY5CHANGEPERCENT, SHORTABLE, " +
                 "EXCHANGE, ASSETCLASS) VALUES " +
-                "(@asset_id, @score, @symbol, @current_price, @companyName, @marketCap, @week52High, @week52Low, @week52Change, @avg10Volume, @avg30Volume, " +
+                "(@assetID, @score, @symbol, @current_price, @companyName, @marketCap, @week52High, @week52Low, @week52Change, @avg10Volume, @avg30Volume, " +
                 "@day200MovingAvg, @day50MovingAvg, @employees, @ttmEPS, @ttmDividendRate, @dividendYield, @nextDividendDate, @exDividendDate, " +
                 "@dividendFrequency, @peRatio, @beta, @maxChangePercent, @year5ChangePercent, @year2ChangePercent,@year1ChangePercent, @ytdChangePercent, " +
                 "@month6ChangePercent, @month3ChangePercent, @month1ChangePercent, @day30ChangePercent, @day5ChangePercent, @shortable, @exchange, @asset_class) " +
-                "ON DUPLICATE KEY UPDATE asset_id = asset_id;",
+                "ON DUPLICATE KEY UPDATE assetID = assetID;",
             new 
             {
                 assetID = potential.assetID, score = potential.score, symbol = potential.symbol, price = potential.price,
@@ -383,7 +383,7 @@ namespace PortfolioPal
             "YEAR5CHANGEPERCENT = @year5ChangePercent, YEAR2CHANGEPERCENT = @year2ChangePercent, YEAR1CHANGEPERCENT = @year1ChangePercent, " + 
             "YTDCHANGEPERCENT = @ytdChangePercent, MONTH6CHANGEPERCENT = @month6ChangePercent, MONTH3CHANGEPERCENT = @month3ChangePercent, " + 
             "MONTH1CHANGEPERCENT = @month1ChangePercent, DAY30CHANGEPERCENT = @day30ChangePercent, DAY5CHANGEPERCENT = @day5ChangePercent, " + 
-            $"SHORTABLE = @shortable, EXCHANGE = @exchange, ASSETCLASS = @asset_class{timestamp}WHERE ASSETID = @asset_id", 
+            $"SHORTABLE = @shortable, EXCHANGE = @exchange, ASSETCLASS = @asset_class{timestamp}WHERE ASSETID = @assetID", 
                 new 
                 { 
                     symbol = potential.symbol, score = potential.score, price = potential.price, companyName = potential.companyName, 
@@ -412,7 +412,7 @@ namespace PortfolioPal
         {
             _conn.Execute("DROP TABLE IF EXISTS `potentials`; " +
             "CREATE TABLE `potentials` (" +
-                "`asset_id` VARCHAR(100) PRIMARY KEY," +
+                "`assetID` VARCHAR(100) PRIMARY KEY," +
                 "`score`	 INT," +
                 "`symbol` VARCHAR(100)," +
                 "`current_price` FLOAT(5)," +
@@ -448,12 +448,12 @@ namespace PortfolioPal
                 "`exchange` VARCHAR(25)," +
                 "`asset_class` VARCHAR(25)," +
                 "`updated` TIMESTAMP);" +
-            "DELETE FROM potentials WHERE potentials.asset_id = NULL;");
+            "DELETE FROM potentials WHERE potentials.assetID = NULL;");
         }
 
         public void ClearPotentialDB(Potential potential)
         {
-            _conn.Execute("DELETE FROM POTENTIALS WHERE asset_id = @asset_id;", new { assetID = potential.assetID });
+            _conn.Execute("DELETE FROM POTENTIALS WHERE assetID = @assetID;", new { assetID = potential.assetID });
         }
         
         public void CalculateStarValue(Potential p)
