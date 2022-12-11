@@ -355,7 +355,7 @@ namespace PortfolioPal
                 "ON DUPLICATE KEY UPDATE assetID = assetID;",
             new 
             {
-                assetID = potential.assetID, score = potential.score, symbol = potential.symbol, price = potential.price,
+                assetID = potential.assetID, score = potential.score, symbol = potential.symbol, current_price = potential.price,
                 companyName = potential.companyName, marketCap = potential.marketCap, week52High = potential.week52High, week52Low = potential.week52Low, 
                 week52Change = potential.week52Change, avg10Volume = potential.avg10Volume, avg30Volume = potential.avg30Volume, 
                 day200MovingAvg = potential.day200MovingAvg, day50MovingAvg = potential.day50MovingAvg, employees = potential.employees, 
@@ -365,7 +365,7 @@ namespace PortfolioPal
                 year5ChangePercent = potential.year5ChangePercent, year2ChangePercent = potential.year2ChangePercent, 
                 year1ChangePercent = potential.year1ChangePercent, ytdChangePercent = potential.ytdChangePercent, month6ChangePercent = potential.month6ChangePercent, 
                 month3ChangePercent = potential.month3ChangePercent, month1ChangePercent = potential.month1ChangePercent, day30ChangePercent = potential.day30ChangePercent, 
-                day5ChangePercent = potential.day5ChangePercent, shortable = potential.shortable, exchange = potential.exchange, assetClass = potential.assetClass
+                day5ChangePercent = potential.day5ChangePercent, shortable = potential.shortable, exchange = potential.exchange, asset_class = potential.assetClass
             });
         }
 
@@ -386,7 +386,7 @@ namespace PortfolioPal
             $"SHORTABLE = @shortable, EXCHANGE = @exchange, ASSETCLASS = @asset_class{timestamp}WHERE ASSETID = @assetID", 
                 new 
                 { 
-                    symbol = potential.symbol, score = potential.score, price = potential.price, companyName = potential.companyName, 
+                    symbol = potential.symbol, score = potential.score, current_price = potential.price, companyName = potential.companyName, 
                     marketCap = potential.marketCap, week52High = potential.week52High, week52Low = potential.week52Low, 
                     week52Change = potential.week52Change, avg10Volume = potential.avg10Volume, avg30Volume = potential.avg30Volume, 
                     day200MovingAvg = potential.day200MovingAvg, day50MovingAvg = potential.day50MovingAvg, employees = potential.employees, 
@@ -396,7 +396,7 @@ namespace PortfolioPal
                     year5ChangePercent = potential.year5ChangePercent, year2ChangePercent = potential.year2ChangePercent, 
                     year1ChangePercent = potential.year1ChangePercent, ytdChangePercent = potential.ytdChangePercent, month6ChangePercent = potential.month6ChangePercent, 
                     month3ChangePercent = potential.month3ChangePercent, month1ChangePercent = potential.month1ChangePercent, day30ChangePercent = potential.day30ChangePercent, 
-                    day5ChangePercent = potential.day5ChangePercent, shortable = potential.shortable, exchange = potential.exchange, assetClass = potential.assetClass, updated = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), 
+                    day5ChangePercent = potential.day5ChangePercent, shortable = potential.shortable, exchange = potential.exchange, asset_class = potential.assetClass, updated = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), 
                     assetID = potential.assetID
                 });
         }

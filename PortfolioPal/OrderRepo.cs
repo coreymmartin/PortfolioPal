@@ -46,21 +46,21 @@ namespace PortfolioPal
         public void CreateOrderTableDB()
         {
             _conn.Execute("DROP TABLE IF EXISTS `orders`; " +
-                "CREATE TABLE `orders`( " +
-                "`symbol` VARCHAR(10), " +
-                "`side` VARCHAR(10), " +
-                "`filledQty` FLOAT(10), " +
-                "`filledPrice` FLOAT(10), " +
-                "`assetClass` VARCHAR(25), " +
-                "`orderType` VARCHAR(25), " +
-                "`orderStatus` VARCHAR(25), " +
-                "`extendedHours` TINYINT, " +
-                "`filledAt` VARCHAR(25), " +
-                "`timeInForce` VARCHAR(25), " +
-                "`qty` FLOAT(10), " +
-                "`assetID` VARCHAR(100), " +
-                "`clientOrderID` VARCHAR(100), " +
-                "`orderID` VARCHAR(100));");
+                "CREATE TABLE `orders`(" +
+                    "`symbol` VARCHAR(10)," +
+                    "`filledQty` FLOAT(10)," +
+                    "`filledPrice` Float(10)," +
+                    "`side` VARCHAR(10)," +
+                    "`asset_class` VARCHAR(25)," +
+                    "`orderType` VARCHAR(25)," +
+                    "`orderStatus` VARCHAR(25)," +
+                    "`extendedHours` TINYINT," +
+                    "`filledAt` VARCHAR(25)," +
+                    "`timeInForce` VARCHAR(25)," +
+                    "`qty` FLOAT(10)," +
+                    "`assetID` VARCHAR(100)," +
+                    "`clientOrderID` VARCHAR(100)," +
+                    "`orderID` VARCHAR(100) PRIMARY KEY");
         }
 
         public void CheckForTable()
@@ -147,13 +147,13 @@ namespace PortfolioPal
         public void AddOrdersToDB(List<Order> orders)
         {
             foreach (var o in orders) {
-                _conn.Execute("INSERT INTO orders (orderID, clientOrderId, orderStatus, filledAt, symbol, side, asset_id, assetClass, filledQty, qty, orderType, filledPrice, " +
-                    "timeInForce, extendedHours) VALUES (@orderID, @clientOrderId, @status, @filledAt, @symbol, @side, @asset_id, @assetClass, @filledQty, @qty, @orderType, " +
+                _conn.Execute("INSERT INTO orders (orderID, clientOrderId, orderStatus, filledAt, symbol, side, asset_id, asset_class, filledQty, qty, orderType, filledPrice, " +
+                    "timeInForce, extendedHours) VALUES (@orderID, @clientOrderId, @status, @filledAt, @symbol, @side, @asset_id, @asset_class, @filledQty, @qty, @orderType, " +
                     "@filledPrice, @timeInForce, @extendedHours) ON DUPLICATE KEY UPDATE orderID = orderID;",
                 new
                 {
                     orderID = o.orderID, clientOrderId = o.clientOrderId, status = o.status, filledAt = o.filledAt, symbol = o.symbol, o.side,
-                    assetID = o.assetID, assetClass = o.assetClass, filledQty = o.filledQty, qty = o.qty, orderType = o.orderType,
+                    assetID = o.assetID, asset_class = o.assetClass, filledQty = o.filledQty, qty = o.qty, orderType = o.orderType,
                     filledPrice = o.filledPrice, timeInForce = o.timeInForce, extendedHours = o.extendedHours
                 });
             }

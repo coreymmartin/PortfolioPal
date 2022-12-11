@@ -1,5 +1,7 @@
+#mysql
+
 CREATE DATABASE IF NOT EXISTS `portfoliopal`;
--- USE `portfoliopal`;
+USE `portfoliopal`;
 
 DROP TABLE IF EXISTS `potentials`;
 CREATE TABLE `potentials` (
@@ -56,7 +58,7 @@ CREATE TABLE `orders`(
 	`qty` FLOAT(10),
 	`assetID` VARCHAR(100),
 	`clientOrderID` VARCHAR(100),
-	`orderID` VARCHAR(100)
+	`orderID` VARCHAR(100) PRIMARY KEY
 );
 
 # you added a lot of stuff here be sure to fix it everywhere else!
@@ -66,7 +68,7 @@ CREATE TABLE `tradedassets`(
     `symbol` VARCHAR(10),
     `exchange` VARCHAR(10),
     `asset_class` VARCHAR(15),
-    `classification` VARCHAR(15),
+    `classification` VARCHAR(25),
     `tradable` TINYINT,
     `shortable` TINYINT,
     `side` VARCHAR(10),

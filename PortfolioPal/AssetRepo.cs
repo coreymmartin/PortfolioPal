@@ -197,18 +197,18 @@ namespace PortfolioPal
                     UserSelectedAssetsTrade.Add(s);
                 }
                 _conn.Execute("INSERT INTO userselectedassets (symbol, asset_class, classification) VALUES (@symbol, @asset_class, @classification);",
-                new { symbol = s, assetClass = "us_equity", classification = "usertrade" });
+                new { symbol = s, asset_class = "us_equity", classification = "usertrade" });
             }
             foreach (var c in UserSelectedAssetsTrade_Coins){
                 if (!UserSelectedAssetsTrade.Contains(c)) {
                     UserSelectedAssetsTrade.Add(c);
                 }
                 _conn.Execute("INSERT INTO userselectedassets (symbol, asset_class, classification) VALUES (@symbol, @asset_class, @classification);",
-                new { symbol = c, assetClass = "crypto", classification = "usertrade" });
+                new { symbol = c, asset_class = "crypto", classification = "usertrade" });
             }
             foreach (var asset in UserSelectedAssetsDividend)
                 _conn.Execute("INSERT INTO userselectedassets (symbol, asset_class, classification) VALUES (@symbol, @asset_class, @classification);",
-                new { symbol = asset, assetClass = "us_equity", classification = "userdividend" });
+                new { symbol = asset, asset_class = "us_equity", classification = "userdividend" });
         }
         public List<string> GetUserSelectedTradeDB()
         {
@@ -236,22 +236,23 @@ namespace PortfolioPal
         }
         // you must fix all of this because you changed the number and names of the values! have fun!!!
         public void CreateTradedAssetTable(){
-            _conn.Execute("DROP TABLE IF EXISTS `tradedassets`; " +
+            _conn.Execute("DROP TABLE IF EXISTS `tradedassets`;" +
                 "CREATE TABLE `tradedassets`(" +
                     "`asset_id` VARCHAR(50) PRIMARY KEY," +
                     "`symbol` VARCHAR(10)," +
+                    "`exchange` VARCHAR(10)," +
                     "`asset_class` VARCHAR(15)," +
-                    "`classification` VARCHAR(15)," +
+                    "`classification` VARCHAR(25)," +
                     "`tradable` TINYINT," +
                     "`shortable` TINYINT," +
                     "`side` VARCHAR(10)," +
                     "`qty` FLOAT(10)," +
-                    "`num_trades_current` FLOAT(10)," +
-                    "`num_trades_total` FLOAT(10)," +
-                    "`num_buys_current` FLOAT(10)," +
-                    "`num_sells_current` FLOAT(10)," +
-                    "`num_buys_total` FLOAT(10)," +
-                    "`num_sells_total` FLOAT(10)," +
+                    "`num_trades_current` FLOAT(10), " +
+                    "`num_trades_total` FLOAT(10), " +
+                    "`num_buys_current` FLOAT(10), " +
+                    "`num_sells_current` FLOAT(10), " +
+                    "`num_buys_total` FLOAT(10), " +
+                    "`num_sells_total` FLOAT(10), " +
                     "`current_price` FLOAT(10)," +
                     "`market_value` FLOAT(10)," +
                     "`avg_entry_price` FLOAT(10)," +
@@ -263,21 +264,21 @@ namespace PortfolioPal
                     "`tsl_enable_short` FLOAT(10)," +
                     "`hsl_trigger` FLOAT(10)," +
                     "`tsl_trigger` FLOAT(10)," +
-                    "`allowance` FLOAT(10)," +
+                    "`allowance` FLOAT(10), " +
                     "`max_active_price` FLOAT(10)," +
                     "`min_active_price` FLOAT(10)," +
                     "`tradestamp` FLOAT(25)," +
-                    "`start_price_current` FLOAT(10)," +
-                    "`start_price_total` FLOAT(10)," +
+                    "`start_price_current` FLOAT(10), " +
+                    "`start_price_total` FLOAT(10), " +
                     "`asset_max_price_current` FLOAT(10)," +
                     "`asset_max_price_total` FLOAT(10)," +
                     "`asset_min_price_current` FLOAT(10)," +
                     "`asset_min_price_total` FLOAT(10)," +
                     "`asset_pl_current` FLOAT(10)," +
                     "`asset_pl_total` FLOAT(10)," +
-                    "`port_pl_now` FLOAT(10)," +
-                    "`port_pl_running` FLOAT(10)," +
-                    "`port_pl_running` FLOAT(10)," +
+                    "`port_pl_now` FLOAT(10), " +
+                    "`port_pl_running` FLOAT(10), " +
+                    "`port_pl_current` FLOAT(10), " +
                     "`port_pl_total` FLOAT(10)," +
                     "`port_perf_per_current` FLOAT(10)," +
                     "`port_perf_per_total` FLOAT(10)," +
@@ -291,23 +292,23 @@ namespace PortfolioPal
                     "`amount_traded_total` FLOAT(10)," +
                     "`roi_current` FLOAT(10)," +
                     "`roi_total` FLOAT(10)," +
-                    "`hsl_signal` VARCHAR(10)," +
+                    "`hsl_signal` VARCHAR(10), " +
                     "`tsl_signal` VARCHAR(10)," +
-                    "`day_signal` VARCHAR(10)," +
-                    "`hour_signal` VARCHAR(10)," +
+                    "`day_signal` VARCHAR(10), " +
+                    "`hour_signal` VARCHAR(10), " +
                     "`15Min_signal` VARCHAR(10)," +
                     "`master_signal` VARCHAR(10)," +
                     "`strategy_champ` VARCHAR(15)," +
-                    "`strategy_day` VARCHAR(15)," +
-                    "`strategy_hour` VARCHAR(15)," +
-                    "`strategy_15Min` VARCHAR(15)," +
+                    "`strategy_day` VARCHAR(15), " +
+                    "`strategy_hour` VARCHAR(15), " +
+                    "`strategy_15Min` VARCHAR(15), " +
                     "`diversity_signal` VARCHAR(5)," +
-                    "`betty_day_period_long` FLOAT(5)," +
-                    "`betty_day_period_short` FLOAT(5)," +
-                    "`betty_hour_period_long` FLOAT(5)," +
+                    "`betty_day_period_long` FLOAT(5), " +
+                    "`betty_day_period_short` FLOAT(5), " +
+                    "`betty_hour_period_long` FLOAT(5), " +
                     "`betty_hour_period_short` FLOAT(5)," +
-                    "`betty_15Min_period_long` FLOAT(5)," +
-                    "`betty_15Min_period_short` FLOAT(5)," +
+                    "`betty_15Min_period_long` FLOAT(5), " +
+                    "`betty_15Min_period_short` FLOAT(5), " +
                     "`mercy_day_slow` FLOAT(5)," +
                     "`mercy_day_fast` FLOAT(5)," +
                     "`mercy_day_smooth` FLOAT(5)," +
@@ -317,12 +318,12 @@ namespace PortfolioPal
                     "`mercy_15Min_slow` FLOAT(5)," +
                     "`mercy_15Min_fast` FLOAT(5)," +
                     "`mercy_15Min_smooth` FLOAT(5)," +
-                    "`polly_day_period` FLOAT(5)," +
-                    "`polly_day_future` FLOAT(5)," +
-                    "`polly_hour_period` FLOAT(5)," +
+                    "`polly_day_period` FLOAT(5), " +
+                    "`polly_day_future` FLOAT(5), " +
+                    "`polly_hour_period` FLOAT(5), " +
                     "`polly_hour_future` FLOAT(5)," +
-                    "`polly_15Min_period` FLOAT(5)," +
-                    "`polly_15Min_future` FLOAT(5)," +
+                    "`polly_15Min_period` FLOAT(5), " +
+                    "`polly_15Min_future` FLOAT(5), " +
                     "`betty_opt_pl_day` FLOAT(10)," +
                     "`betty_opt_pl_hour` FLOAT(10)," +
                     "`betty_opt_pl_15Min` FLOAT(10)," +
@@ -354,8 +355,7 @@ namespace PortfolioPal
                     "`status_check` FLOAT(15)," +
                     "`updated` VARCHAR(50)," +
                     "`strategy_timestamp` VARCHAR(50)," +
-                    "`created` VARCHAR(50));"
-                );
+                    "`created` VARCHAR(50));");
         }
 
         public IEnumerable<Asset> GetAllTradedAssetsDB(){

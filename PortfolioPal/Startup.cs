@@ -34,11 +34,17 @@ namespace PortfolioPal
                 return conn;
             });
 
-            services.AddTransient<IPotentialRepo, PotentialRepo>();
-            services.AddTransient<IOrderRepo, OrderRepo>();
-            services.AddTransient<IAssetRepo, AssetRepo>();
-            services.AddTransient<IPortfolioRepo, PortfolioRepo>();
-            services.AddTransient<IConfigRepo, ConfigRepo>();
+            // services.AddTransient<IPotentialRepo, PotentialRepo>();
+            // services.AddTransient<IOrderRepo, OrderRepo>();
+            // services.AddTransient<IAssetRepo, AssetRepo>();
+            // services.AddTransient<IPortfolioRepo, PortfolioRepo>();
+            // services.AddTransient<IConfigRepo, ConfigRepo>();
+
+            services.AddScoped<IPotentialRepo, PotentialRepo>();
+            services.AddScoped<IOrderRepo, OrderRepo>();
+            services.AddScoped<IAssetRepo, AssetRepo>();
+            services.AddScoped<IPortfolioRepo, PortfolioRepo>();
+            services.AddScoped<IConfigRepo, ConfigRepo>();
             services.AddControllersWithViews();
         }
 
